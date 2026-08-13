@@ -1,0 +1,39 @@
+# Credenziali e file privati — MAI committare
+CONTEXT.md
+**/CONTEXT.md
+.credentials.json
+**/.credentials.json
+.env
+**/.env
+*.local
+google-service-account*.json
+firebase-credentials*.json
+
+# Cronologia sessioni / cache Claude
+history.jsonl
+debug/
+file-history/
+.claude/cache/
+.claude/sessions/
+.claude/downloads/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.idea/
+.vscode/
+
+# Output build
+node_modules/
+dist/
+build/
+*.log
+
+# LLM Wiki output (generato, non versionato)
+llm-wiki/output/
+
+# File personali di esempio (non sanitizzati)
+project-memories/_private/
