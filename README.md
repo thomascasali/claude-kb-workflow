@@ -182,7 +182,7 @@ the session*: the memory. They install side by side without conflicts. See
 
 ### Do I need the wiki to use the agents?
 
-No. The subagents, patterns, and skills all work standalone — install
+No. The subagents, patterns, and skills all work standalone: install
 only what you need. The wiki→KB pipeline is the core of the system, but it's
 opt-in: start with the agents, add the memory when you feel the amnesia tax.
 
@@ -280,7 +280,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) (in Italian). In short:
 **Contribution language**: Italian or English. The core KB is in Italian, but
 agents and skills can be in English if they serve stack-specific patterns.
 
-Agent and skill content is currently Italian — the architecture is
+Agent and skill content is currently Italian, while the architecture is
 language-neutral (Claude reads Italian descriptions just fine regardless of
 your language). **English translations are the most welcome contribution.**
 
@@ -288,7 +288,7 @@ your language). **English translations are the most welcome contribution.**
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Fork it, modify it, redistribute it. If it's useful to you, a star on GitHub is appreciated.
+MIT. See [LICENSE](LICENSE). Fork it, modify it, redistribute it. If it's useful to you, a star on GitHub is appreciated.
 
 ---
 
@@ -308,12 +308,12 @@ MIT — see [LICENSE](LICENSE). Fork it, modify it, redistribute it. If it's use
 
 > **Il sistema di memoria per Claude Code**: la pipeline di conoscenza wiki → KB
 > (pattern Karpathy, in produzione da aprile 2026 su 15+ progetti reali) che fa
-> sì che quello che impari in una sessione **non vada mai più perso** — con a corredo
+> sì che la sessione dopo parta da quello che ha imparato la precedente, con a corredo
 > 12 subagent orchestrati, 30 pattern pagati in produzione e 6 skill metodologiche.
 >
 > Gli skills framework come [Superpowers](https://github.com/obra/superpowers), GSD e gstack
 > ti dicono *come eseguire* una sessione; questo toolkit si occupa di *cosa resta dopo*.
-> **Sono complementari: si installano insieme senza conflitti** — vedi
+> **Sono complementari: si installano insieme senza conflitti**. Vedi
 > [il confronto aggiornato al 2026](docs/confronto-superpowers.md).
 
 I 4 documenti di approfondimento hanno una versione italiana nativa:
@@ -333,10 +333,10 @@ cd claude-kb-workflow
 
 Poi riavvia Claude Code: agenti, pattern e skill sono da subito disponibili.
 
-**Perché l'italiano**: questo toolkit è costruito anche per i miei studenti —
+**Perché l'italiano**: questo toolkit è costruito anche per i miei studenti,
 l'Italia ha poche risorse native su questi temi. La documentazione core nasce
 in italiano e viene tradotta in inglese, non viceversa.
 
-Per tutto il resto — cosa fa il toolkit, quick start, filosofia, struttura del
-repo, come contribuire, licenza — vedi la sezione inglese qui sopra: è la
+Per tutto il resto (cosa fa il toolkit, quick start, filosofia, struttura del
+repo, come contribuire, licenza) vedi la sezione inglese qui sopra: è la
 stessa identica cosa, solo in un'altra lingua.
