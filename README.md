@@ -3,12 +3,12 @@
 > **The memory system for Claude Code**: the wiki → KB knowledge pipeline
 > (Karpathy pattern, running in production since April 2026 across 15+ real
 > projects) that makes sure what you learn in a session **never gets lost
-> again** — bundled with 12 orchestrated subagents, 30 patterns battle-tested
+> again**, bundled with 12 orchestrated subagents, 30 patterns battle-tested
 > in production, and 6 methodological skills.
 >
 > Skills frameworks like [Superpowers](https://github.com/obra/superpowers), GSD and gstack
 > tell you *how to run* a session; this toolkit is about *what's left afterwards*.
-> **They're complementary: they install side by side without conflicts** — see
+> **They're complementary: they install side by side without conflicts**. See
 > [the 2026 comparison](docs/comparison-2026.md).
 
 **claude-kb-workflow** is an open-source memory system for Claude Code: a
@@ -30,8 +30,8 @@ When you work with Claude Code across multiple projects, you keep hitting the sa
 - 🧩 **Different stacks need different patterns**, but you write them all from memory every time
 - 🏗️ **Architectural decisions** made months ago get forgotten
 
-`claude-kb-workflow` solves this with 4 pieces that work together — the first
-is the core, the other three are the gear that comes with it:
+`claude-kb-workflow` solves this with 4 pieces that work together. The first
+is the core; the other three are the gear that comes with it:
 
 ### 1. KB-driven system (`commands/` + `llm-wiki-template/`) — the core
 
@@ -45,8 +45,8 @@ Real sessions (messy) → LLM Wiki (living synthesis) → Stable KB (authoritati
 ```
 
 An implementation of Karpathy's LLM Wiki pattern (which went viral in April
-2026 — this pipeline has been running since that same month; the toolkit has
-shipped it since May), with the extra layer that generic guides don't have:
+2026; this pipeline has been running since that same month, and the toolkit
+has shipped it since May), with the extra layer that generic guides don't have:
 **promotion to the stable KB with maturity criteria** (2+ projects, verified
 in production). See [the full KB-driven workflow](docs/kb-driven-workflow.md)
 and the [knowledge disaster recovery](docs/knowledge-disaster-recovery.md).
@@ -54,15 +54,15 @@ and the [knowledge disaster recovery](docs/knowledge-disaster-recovery.md).
 ### 2. Orchestrated subagents (`agents/`) — new in v0.2
 
 12 subagents **with valid YAML frontmatter** (name/description/model): Claude
-registers them automatically and the main model — the **lead** — picks them
+registers them automatically and the main model (the **lead**) picks them
 on its own based on the description. Two tiers:
 
 - **Orchestrators**: `deep-reasoner` (Opus, reasoning phases) and `fast-worker` (Sonnet, mechanical work)
 - **10 multi-stack specialists**: `backend-dev`, `frontend-dev`, `mobile-dev`, `devops`, `database`, `integrations`, `realtime-dev`, `ci-cd` (Sonnet) + `reviewer`, `security` (Opus)
 
-The full system — flat delegation, mandatory `reviewer` gate, the hierarchy
-of levers, and the story of how corrupted frontmatter kept the whole thing
-dormant for months — is in [`docs/orchestration.md`](docs/orchestration.md).
+The full system is in [`docs/orchestration.md`](docs/orchestration.md): flat
+delegation, the mandatory `reviewer` gate, the hierarchy of levers, and the
+story of how corrupted frontmatter kept the whole thing dormant for months.
 
 ⚠️ If you were using v0.1: the agents were plain documents with no
 frontmatter → **they were never orchestrated automatically**. Reinstall with
