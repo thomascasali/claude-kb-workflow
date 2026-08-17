@@ -2,8 +2,8 @@
 
 > **The memory system for Claude Code**: the wiki → KB knowledge pipeline
 > (Karpathy pattern, running in production since April 2026 across 15+ real
-> projects) that makes sure what you learn in a session **never gets lost
-> again**, bundled with 12 orchestrated subagents, 30 patterns battle-tested
+> projects) so the next session starts from what the last one learned,
+> bundled with 12 orchestrated subagents, 30 patterns battle-tested
 > in production, and 6 methodological skills.
 >
 > Skills frameworks like [Superpowers](https://github.com/obra/superpowers), GSD and gstack
@@ -14,21 +14,21 @@
 **claude-kb-workflow** is an open-source memory system for Claude Code: a
 three-tier pipeline (sessions → LLM wiki → stable KB) where knowledge is
 promoted only after being verified in production on 2+ projects. Running since
-April 2026 on 15+ live products, it ships 12 orchestrated subagents, 30
-battle-tested patterns, and 6 methodological skills. Docs in English and Italian.
+April 2026 on 15+ live products, it bundles orchestrated subagents, patterns
+paid for in production, and methodological skills. Docs in English and Italian.
 
 [🇮🇹 Versione italiana più sotto](#-per-gli-sviluppatori-italiani)
 
 ---
 
-## 🎯 What this toolkit does
+## What this toolkit does
 
 When you work with Claude Code across multiple projects, you keep hitting the same problems:
 
-- 📝 **You lose context** between one session and the next
-- 🔁 **You repeat the same mistakes** because there's no memory of lessons learned
-- 🧩 **Different stacks need different patterns**, but you write them all from memory every time
-- 🏗️ **Architectural decisions** made months ago get forgotten
+- **You lose context** between one session and the next
+- **You repeat the same mistakes** because there's no memory of lessons learned
+- **Different stacks need different patterns**, but you write them all from memory every time
+- **Architectural decisions** made months ago get forgotten
 
 `claude-kb-workflow` solves this with 4 pieces that work together. The first
 is the core; the other three are the gear that comes with it:
@@ -46,7 +46,7 @@ Real sessions (messy) → LLM Wiki (living synthesis) → Stable KB (authoritati
 
 An implementation of Karpathy's LLM Wiki pattern (which went viral in April
 2026; this pipeline has been running since that same month, and the toolkit
-has shipped it since May), with the extra layer that generic guides don't have:
+has shipped it since May), with the layer missing from the write-ups I found:
 **promotion to the stable KB with maturity criteria** (2+ projects, verified
 in production). See [the full KB-driven workflow](docs/kb-driven-workflow.md)
 and the [knowledge disaster recovery](docs/knowledge-disaster-recovery.md).
@@ -80,7 +80,7 @@ the script and restart your sessions.
 
 ### 4. Methodological skills (`skills/`)
 
-6 skills that Claude activates automatically in the right context:
+6 skills that Claude picks up from their description, when the description matches:
 - `debugging-sistematico` — root cause before the fix
 - `verifica-prima-di-completare` — evidence before declaring "done"
 - `brainstorming-design` — design approval for non-trivial tasks
@@ -90,7 +90,7 @@ the script and restart your sessions.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
@@ -124,40 +124,27 @@ Then in Claude Code:
 
 ---
 
-## 📚 Philosophy
+## Philosophy
 
-### What this toolkit is NOT
+It doesn't impose a method and it doesn't replace your judgment. Install the
+parts you want: agents, patterns and skills work without the wiki.
 
-- ❌ It's not a rigid framework that dictates how you work
-- ❌ It doesn't replace your architectural judgment
-- ❌ It's not "all or nothing" — install only the parts you need
-
-### What it IS
-
-- ✅ A **shared memory** across Claude sessions
-- ✅ A **library of experience** organized by domain
-- ✅ A **stabilization workflow** that separates noise from signal
-- ✅ A **starting point** to fork and customize
-
-### Three guiding principles
-
-1. **Experience precedes method** — the patterns in here come from real production bugs, not theory.
-2. **Knowledge stratifies** — wiki = liquid, KB = solid. Only promote what has survived the test of time.
-3. **Triggers > rules** — skills activate by description, not by imposition. If a skill slows you down, narrow its trigger or remove it.
+The patterns here come from production bugs, not from theory, and nothing
+reaches the KB until it has held up on a second project. Skills activate by
+description: if one slows you down, narrow its trigger or delete it.
 
 Deeper dive → [docs/filosofia.md](docs/filosofia.md) (in Italian)
 
 ---
 
-## 🆚 In the 2026 landscape (Superpowers, GSD, gstack)
+## Compared to Superpowers, GSD and gstack
 
 | Aspect | Superpowers | claude-kb-workflow |
 |---------|-------------|---------------------|
 | What it is | Methodological framework (TDD-strict, plan-driven) | Memory system: KB + wiki + agents + patterns |
 | **Concerned with** | **How you run *the* session** | **What remains AFTER the session** |
-| Imposes a method? | Yes, top-down | No, bottom-up |
 | Base unit | Skills that chain rigid phases | Agents, patterns, project-memory |
-| Target | SaaS teams that want discipline | Developers working across many different projects |
+| Target | a disciplined loop inside one session | many unrelated projects over time |
 | Language | English-only | English front door, native Italian docs |
 | Extensibility | Add a phase = add a skill | Add an agent / pattern / project-memory |
 
@@ -170,7 +157,7 @@ Deeper dive → [docs/comparison-2026.md](docs/comparison-2026.md)
 
 ---
 
-## ❓ FAQ
+## FAQ
 
 ### Does Claude Code remember anything between sessions?
 
@@ -184,7 +171,7 @@ mature knowledge to a stable KB that every future session can read.
 CLAUDE.md is a single static file you maintain by hand, and it grows until it
 becomes noise. This system separates fresh knowledge (wiki, updated per
 session) from authoritative knowledge (KB, promoted only when verified in
-production on 2+ projects), so the model reads signal instead of a landfill.
+production on 2+ projects), so what it reads is the part that held up.
 
 ### claude-kb-workflow vs Superpowers — which one do I need?
 
@@ -195,20 +182,21 @@ the session*: the memory. They install side by side without conflicts. See
 
 ### Do I need the wiki to use the agents?
 
-No. The 12 subagents, 30 patterns, and 6 skills work standalone — install
+No. The subagents, patterns, and skills all work standalone — install
 only what you need. The wiki→KB pipeline is the core of the system, but it's
 opt-in: start with the agents, add the memory when you feel the amnesia tax.
 
 ### Does this only work with Claude Code?
 
-The engine is replaceable; the memory isn't. The pipeline is markdown + git +
-conventions, operable from Cursor, Codex CLI, Gemini CLI, or aider. The most
-Claude Code-specific part is the subagent mechanics; the role prompts and the
-policies port anywhere. Details in [the workflow FAQ](docs/kb-driven-workflow.md).
+The engine is replaceable; the memory isn't. It's markdown, git and
+conventions, so it should port to Cursor, Codex CLI or aider. I've only run
+it in Claude Code. The most Claude Code-specific part is the subagent
+mechanics; the role prompts and the policies port anywhere. Details in
+[the workflow FAQ](docs/kb-driven-workflow.md).
 
 ---
 
-## 📂 Repo structure
+## Repo structure
 
 ```
 claude-kb-workflow/
@@ -267,7 +255,7 @@ claude-kb-workflow/
 
 ---
 
-## 🧪 Testing and feedback
+## Testing and feedback
 
 If you want to **test the toolkit** on one of your real projects, read the [full tester guide](TESTING-GUIDE.md) (in Italian).
 
@@ -280,7 +268,7 @@ Quick summary:
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) (in Italian). In short:
 
@@ -298,13 +286,13 @@ your language). **English translations are the most welcome contribution.**
 
 ---
 
-## ⚖️ License
+## License
 
 MIT — see [LICENSE](LICENSE). Fork it, modify it, redistribute it. If it's useful to you, a star on GitHub is appreciated.
 
 ---
 
-## 📖 Credits
+## Credits
 
 - **Methodological skills** (`debugging-sistematico`, `verifica-prima-di-completare`, `brainstorming-design`) adapted from [obra/superpowers](https://github.com/obra/superpowers) (MIT)
 - **Two-tier KB-driven pattern** inspired by Andrej Karpathy's discussions on managing LLM knowledge
