@@ -52,7 +52,7 @@ in production). See [the full KB-driven workflow](docs/kb-driven-workflow.md)
 and the [knowledge disaster recovery](docs/knowledge-disaster-recovery.md).
 Prefer slides? The same method as [an interactive presentation in five acts](https://thomascasali.github.io/presentazione-kb-workflow/?lang=en), in English and Italian.
 
-### 2. Orchestrated subagents (`agents/`) — new in v0.2
+### 2. Orchestrated subagents (`agents/`)
 
 12 subagents **with valid YAML frontmatter** (name/description/model): Claude
 registers them automatically and the main model (the **lead**) picks them
@@ -65,18 +65,13 @@ The full system is in [`docs/orchestration.md`](docs/orchestration.md): flat
 delegation, the mandatory `reviewer` gate, the hierarchy of levers, and the
 story of how corrupted frontmatter kept the whole thing dormant for months.
 
-⚠️ If you were using v0.1: the agents were plain documents with no
-frontmatter → **they were never orchestrated automatically**. Reinstall with
-the script and restart your sessions.
-
 ### 3. Critical patterns (`patterns/`)
 
 **30 patterns** and antipatterns captured from real production experience
 (live sites like fivbeach.com, maraffaonline.it, tornei.app):
 - Laravel/Express routing errors, Vite pitfalls, Docker bind-mount permissions
 - Socket.io, MongoDB, Firestore, MQTT, WAF bypass via WARP
-- **New in v0.2**: multi-tenant single-DB, internal SSO/IdP, sync-selector
-  catch-22, cold-cache page speed, git/deploy on an unstable VPS, FEA-OTP
+- Multi-tenant single-DB, internal SSO/IdP, sync-selector catch-22, cold-cache page speed, git/deploy on an unstable VPS, FEA-OTP
   signing, web push via FCM without an SDK, idempotent payment webhooks
 
 ### 4. Methodological skills (`skills/`)
@@ -205,7 +200,7 @@ claude-kb-workflow/
 ├── TESTING-GUIDE.md             # Guide for people who want to test the toolkit
 ├── CONTRIBUTING.md              # How to contribute
 ├── LICENSE                      # MIT
-├── agents/                      # 12 subagents with frontmatter (v0.2)
+├── agents/                      # 12 subagents with frontmatter
 │   ├── README-AGENTI.md         # Decision tree + orchestration
 │   ├── deep-reasoner.md         # Opus — reasoning phases (NEW)
 │   ├── fast-worker.md           # Sonnet — mechanical work (NEW)
@@ -245,8 +240,8 @@ claude-kb-workflow/
 │   └── esempio-saas-fittizio.md
 ├── docs/                        # Deep dives
 │   ├── filosofia.md
-│   ├── orchestration.md / orchestrazione.md        # Lead+subagent system (NEW v0.2)
-│   ├── knowledge-disaster-recovery.md / disaster-recovery-conoscenza.md  # 100%-restorable knowledge (NEW v0.2)
+│   ├── orchestration.md / orchestrazione.md        # Lead+subagent system
+│   ├── knowledge-disaster-recovery.md / disaster-recovery-conoscenza.md  # 100%-restorable knowledge
 │   ├── kb-driven-workflow.md / workflow-kb-driven.md    # + retroactive census from transcripts
 │   └── comparison-2026.md / confronto-superpowers.md
 └── scripts/
