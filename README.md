@@ -50,6 +50,7 @@ has shipped it since May), with the layer missing from the write-ups I found:
 **promotion to the stable KB with maturity criteria** (2+ projects, verified
 in production). See [the full KB-driven workflow](docs/kb-driven-workflow.md)
 and the [knowledge disaster recovery](docs/knowledge-disaster-recovery.md).
+Prefer slides? The same method as [an interactive presentation in five acts](https://thomascasali.github.io/presentazione-kb-workflow/?lang=en), in English and Italian.
 
 ### 2. Orchestrated subagents (`agents/`) — new in v0.2
 
@@ -322,6 +323,7 @@ I 4 documenti di approfondimento hanno una versione italiana nativa:
 - [docs/workflow-kb-driven.md](docs/workflow-kb-driven.md) — sistema a 3 livelli sessione → wiki → KB
 - [docs/disaster-recovery-conoscenza.md](docs/disaster-recovery-conoscenza.md) — conoscenza ripristinabile al 100%
 - [docs/confronto-superpowers.md](docs/confronto-superpowers.md) — confronto con Superpowers/GSD/gstack
+- [Presentazione interattiva in cinque atti](https://thomascasali.github.io/presentazione-kb-workflow/) — lo stesso metodo raccontato per gli studenti (italiano e inglese)
 
 ### Avvio rapido
 
