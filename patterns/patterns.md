@@ -175,7 +175,7 @@ docker run -d --name warp-proxy --restart unless-stopped --network <app-network>
 // Route through the SOCKS5 proxy only when it's configured, so the app
 // degrades to a direct request rather than depending on WARP being up.
 $req = Http::timeout(30);
-if ($proxy = config('services.<svc>.http_proxy')) { // e.g. socks5h://warp-proxy:1080
+if ($proxy = config('services.origin_api.http_proxy')) { // e.g. socks5h://warp-proxy:1080
     $req = $req->withOptions(['proxy' => $proxy]); // socks5h resolves DNS through the proxy
 }
 $resp = $req->get($originUrl);

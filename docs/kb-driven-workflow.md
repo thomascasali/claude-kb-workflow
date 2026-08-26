@@ -23,7 +23,7 @@ Naive solutions fail because:
 | "I dump everything in one giant README" | Becomes unreadable, nobody keeps it updated |
 | "I keep a memory file per project" | Good per project, but not for cross-project patterns |
 | "I take scattered notes on the desktop" | They get lost and Claude can't search them |
-| "I let Claude handle it" | Amnesia between sessions |
+| "I let Claude handle it" | Knowledge stays stuck in one project |
 
 ---
 

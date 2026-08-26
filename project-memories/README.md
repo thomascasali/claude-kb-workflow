@@ -1,6 +1,6 @@
 # Project Memories
 
-> Una "project memory" è una scheda riassuntiva del progetto che Claude legge a ogni nuova sessione, per non perdere il contesto. È il **vero antidoto all'amnesia** tra sessioni.
+> Una "project memory" è una scheda riassuntiva del progetto che Claude legge a ogni nuova sessione: il contesto che serve a chiunque (umano o agente) apra il progetto, versionato INSIEME al progetto invece che nella memoria locale di una macchina.
 
 ## Come funzionano
 

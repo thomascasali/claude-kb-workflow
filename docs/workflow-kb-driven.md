@@ -23,7 +23,7 @@ Le soluzioni naïve falliscono perché:
 | "Salvo tutto in un README giga" | Diventa illeggibile, nessuno lo aggiorna |
 | "Tengo memory file per progetto" | Buono per progetto, ma non per pattern cross-progetto |
 | "Faccio note sparse sul desktop" | Si perdono, non sono cercabili da Claude |
-| "Lascio fare a Claude" | Amnesia tra sessioni |
+| "Lascio fare a Claude" | La conoscenza resta chiusa nel singolo progetto |
 
 ---
 

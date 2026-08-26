@@ -13,6 +13,8 @@ outside this specific setup, see patterns/patterns.md instead.
 
 # Field Notes — Convenzioni Operative Personali
 
+*In Italian on purpose: these are the author's own operating conventions across his projects, kept here as a worked example of a shared conventions file. The reusable, general patterns live in [patterns.md](patterns.md), in English.*
+
 > Note pratiche del mio setup multi-progetto: deploy, percorsi, provider VPS, credenziali.
 > Utili a me come promemoria; a te soprattutto come esempio di formato.
 

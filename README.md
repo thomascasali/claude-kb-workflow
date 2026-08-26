@@ -1,6 +1,6 @@
 # claude-kb-workflow
 
-> **Knowledge that crosses your projects.** Claude Code's native memory is
+> **Knowledge that crosses your projects.** Claude Code's native auto-memory is
 > per-project and per-machine: the lesson you paid for in one repo never
 > reaches the other twenty. This toolkit compiles sessions into a wiki and
 > promotes a page to a stable, cross-project KB only when it clears a
@@ -186,7 +186,8 @@ the session*: the memory. They install side by side without conflicts. See
 
 No. The subagents, patterns, and skills all work standalone: install
 only what you need. The wiki→KB pipeline is the core of the system, but it's
-opt-in: start with the agents, add the memory when you feel the amnesia tax.
+opt-in: start with the agents, add the pipeline when you notice the same
+lesson being relearned on a second project.
 
 ### Does this only work with Claude Code?
 
@@ -309,7 +310,7 @@ MIT. See [LICENSE](LICENSE). Fork it, modify it, redistribute it. If it's useful
 
 ## 🇮🇹 Per gli sviluppatori italiani
 
-> **Conoscenza che attraversa i progetti.** La memoria nativa di Claude Code
+> **Conoscenza che attraversa i progetti.** L'auto-memory nativa di Claude Code
 > è per-progetto e per-macchina: la lezione pagata su un repo non arriva mai
 > agli altri venti. Questo toolkit compila le sessioni in una wiki e promuove
 > una pagina alla KB stabile e trasversale solo quando supera una soglia in

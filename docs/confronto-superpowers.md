@@ -19,12 +19,12 @@ stabilizza, Superpowers esegue"**:
 In parallelo, le **raccolte di agenti si sono commoditizzate**: esistono toolkit con 100-135
 agenti pronti. Competere sulla quantità di agenti non ha più senso per nessuno.
 
-**Dove si colloca `claude-kb-workflow`**: in un'altra categoria — il **sistema di memoria**.
+**Dove si colloca `claude-kb-workflow`**: in un'altra categoria — il **livello di conoscenza trasversale ai progetti**.
 Gli skills framework ti dicono *come eseguire* una sessione; questo repo si occupa di *cosa
 resta* dopo la sessione: la pipeline wiki→KB (pattern Karpathy, diventato virale ad aprile
-2026 — la nostra implementazione gira da quello stesso mese su 15+ progetti reali), i pattern
+2026 — la nostra implementazione gira da quello stesso mese), i pattern
 pagati in produzione, il disaster recovery della conoscenza. **Si installano insieme senza
-conflitti: loro il metodo di esecuzione, noi il sistema di memoria.**
+conflitti: loro il metodo di esecuzione, noi il livello di conoscenza.**
 
 ---
 
@@ -217,7 +217,7 @@ Sviluppatore Laravel + Vue + Flutter
 - Vuoi un toolkit modulare (installa solo cosa ti serve)
 
 ### Scegli entrambi se (è il caso più comune):
-- Vuoi il meglio dei due mondi: **un framework di esecuzione + un sistema di memoria**
+- Vuoi il meglio dei due mondi: **un framework di esecuzione + un livello di conoscenza condiviso**
 - Il tuo problema non è "come lavora l'agente in sessione" ma "perché rifaccio gli
   stessi errori di tre mesi fa" → quella parte nessuno degli skills framework la copre
 - Hai tempo di apprendere 2 sistemi (l'onboarding di kb-workflow è più leggero: si

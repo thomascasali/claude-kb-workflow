@@ -20,13 +20,13 @@ In parallel, **agent collections have become commoditized**: toolkits with
 100-135 ready-made agents exist. Competing on agent count no longer makes
 sense for anyone.
 
-**Where `claude-kb-workflow` sits**: in a different category — the **memory
-system**. Skills frameworks tell you *how to run* a session; this repo is
+**Where `claude-kb-workflow` sits**: in a different category — the
+**cross-project knowledge layer**. Skills frameworks tell you *how to run* a session; this repo is
 about what's left after the session: the wiki→KB pipeline (Karpathy
 pattern, which went viral in April 2026 — our implementation has been
-running since that same month across 15+ real projects), patterns
+running since that same month), patterns
 battle-tested in production, knowledge disaster recovery. **They install
-side by side without conflicts: their execution method, our memory system.**
+side by side without conflicts: their execution method, our knowledge layer.**
 
 ---
 

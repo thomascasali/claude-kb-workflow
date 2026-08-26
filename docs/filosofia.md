@@ -8,7 +8,7 @@
 
 Lavorare con un LLM agentico su molti progetti diversi ti scontra costantemente contro questi attriti:
 
-1. **Amnesia tra sessioni**: ogni nuova sessione, l'LLM riparte da zero. Non sa cosa hai deciso ieri, non sa quali bug hai già risolto, non sa che il deploy del progetto X va fatto diversamente da quello del progetto Y.
+1. **Conoscenza confinata al singolo progetto**: la memoria nativa di Claude Code funziona, ma è per-progetto e per-macchina. Quello che impari sul progetto X non arriva mai al progetto Y, e su una macchina nuova riparti da capo.
 
 2. **Variabilità di qualità**: lo stesso prompt produce risposte di qualità diversa a seconda del contesto, della giornata, della fortuna. Manca un "sistema immunitario" che alzi l'asticella.
 

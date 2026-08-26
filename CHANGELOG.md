@@ -52,3 +52,18 @@ La release "il sistema ora funziona davvero".
 - Release iniziale: 10 agenti-documento, 22 pattern critici, 6 skill metodologiche,
   5 comandi `/kb-*`, template LLM wiki, guide (filosofia, workflow KB-driven,
   confronto Superpowers).
+
+## [0.3.2] - 2026-08-25
+
+Repositioning release, no functional changes to commands or agents.
+
+- README, llms.txt and docs now lead with the cross-project angle: Claude
+  Code's native auto-memory is per-project and per-machine; this toolkit is
+  the layer above it. The earlier "between sessions nothing survives" claim
+  was wrong and has been removed everywhere.
+- `patterns/critical-patterns.md` (30 mixed-quality items, Italian) split
+  into `patterns/patterns.md` (16 general patterns, English) and
+  `patterns/field-notes-it.md` (the author's own conventions, Italian,
+  clearly labeled). Old links to critical-patterns.md no longer resolve.
+- install.sh removes the stale `critical-patterns.md` from `~/.claude/patterns/`
+  on upgrade.

@@ -78,8 +78,9 @@ echo "    e li sceglie automaticamente in base alla description, nessuna registr
 # 2. Patterns
 echo -e "${YELLOW}[2/5] Installando patterns...${NC}"
 mkdir -p "$CLAUDE_HOME/patterns"
+rm -f "$CLAUDE_HOME/patterns/critical-patterns.md"   # sostituito da patterns.md + field-notes-it.md
 cp -f "$REPO_DIR/patterns/"*.md "$CLAUDE_HOME/patterns/"
-echo "  ✓ $(ls "$REPO_DIR/patterns/"*.md | wc -l) file di pattern installati (16 pattern generalizzati + convenzioni personali IT)"
+echo "  ✓ $(ls "$CLAUDE_HOME/patterns/"*.md | wc -l) file di pattern installati (16 pattern generalizzati + convenzioni personali IT)"
 
 # 3. Workflows
 echo -e "${YELLOW}[3/5] Installando workflows...${NC}"
