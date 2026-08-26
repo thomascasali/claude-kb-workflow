@@ -228,7 +228,7 @@ Laravel + Vue + Flutter developer
 - You want a modular toolkit (install only what you need)
 
 ### Choose both if (the most common case):
-- You want the best of both worlds: **an execution framework + a memory system**
+- You want the best of both worlds: **an execution framework + a shared knowledge layer**
 - Your problem isn't "how does the agent work within a session" but "why am I
   making the same mistakes I made three months ago" → no skills framework
   covers that part
