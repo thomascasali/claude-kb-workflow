@@ -26,7 +26,7 @@ I framework di sviluppo (TDD strict, Scrum strict, Clean Architecture strict) sp
 
 `claude-kb-workflow` parte dall'opposto: **catturare cosa ha funzionato in produzione** e renderlo riusabile. Il metodo emerge dalla pratica, non viene imposto.
 
-Conseguenza pratica: gli agenti contengono **esempi di codice reale** (sanitizzati) accanto agli antipattern osservati. I pattern in `critical-patterns.md` sono tutti accompagnati da "sintomo / causa / fix verificato".
+Conseguenza pratica: gli agenti contengono **esempi di codice reale** (sanitizzati) accanto agli antipattern osservati. I pattern in `patterns.md` (e le mie convenzioni in `field-notes-it.md`) sono tutti accompagnati da "sintomo / causa / fix verificato".
 
 ### 2. La conoscenza si stratifica
 

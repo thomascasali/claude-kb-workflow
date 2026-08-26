@@ -1,21 +1,22 @@
 # claude-kb-workflow
 
-> **The memory system for Claude Code**: the wiki → KB knowledge pipeline
-> (Karpathy pattern, running in production since April 2026 across 15+ real
-> projects) so the next session starts from what the last one learned,
-> bundled with 12 orchestrated subagents, 30 patterns battle-tested
-> in production, and 6 methodological skills.
+> **Knowledge that crosses your projects.** Claude Code's native memory is
+> per-project and per-machine: the lesson you paid for in one repo never
+> reaches the other twenty. This toolkit compiles sessions into a wiki and
+> promotes a page to a stable, cross-project KB only when it clears a
+> numeric bar: **seen on 2+ projects, 2+ sessions, verified in production.**
 >
 > Skills frameworks like [Superpowers](https://github.com/obra/superpowers), GSD and gstack
 > tell you *how to run* a session; this toolkit is about *what's left afterwards*.
 > **They're complementary: they install side by side without conflicts**. See
 > [the 2026 comparison](docs/comparison-2026.md).
 
-**claude-kb-workflow** is an open-source memory system for Claude Code: a
-three-tier pipeline (sessions → LLM wiki → stable KB) where knowledge is
-promoted only after being verified in production on 2+ projects. Running since
-April 2026 on 15+ live products, it bundles orchestrated subagents, patterns
-paid for in production, and methodological skills. Docs in English and Italian.
+**claude-kb-workflow** is an open-source knowledge pipeline for Claude Code
+(sessions → LLM wiki → stable KB, in the Karpathy wiki tradition) for people
+who maintain many unrelated projects alone. It ships with orchestrated
+subagents, production patterns, and methodological skills, plus the piece
+almost nobody publishes: [a restore dry-run that failed](docs/knowledge-disaster-recovery.md),
+with the four silent gaps it exposed. Docs in English and Italian.
 
 [🇮🇹 Versione italiana più sotto](#-per-gli-sviluppatori-italiani)
 
@@ -65,14 +66,18 @@ The full system is in [`docs/orchestration.md`](docs/orchestration.md): flat
 delegation, the mandatory `reviewer` gate, the hierarchy of levers, and the
 story of how corrupted frontmatter kept the whole thing dormant for months.
 
-### 3. Critical patterns (`patterns/`)
+### 3. Patterns (`patterns/`)
 
-**30 patterns** and antipatterns captured from real production experience
-(live sites like fivbeach.com, maraffaonline.it, tornei.app):
-- Laravel/Express routing errors, Vite pitfalls, Docker bind-mount permissions
-- Socket.io, MongoDB, Firestore, MQTT, WAF bypass via WARP
-- Multi-tenant single-DB, internal SSO/IdP, sync-selector catch-22, cold-cache page speed, git/deploy on an unstable VPS, FEA-OTP
-  signing, web push via FCM without an SDK, idempotent payment webhooks
+**16 patterns** in [`patterns/patterns.md`](patterns/patterns.md), generalized from
+production bugs on live sites (fivbeach.com, maraffaonline.it, tornei.app) so they
+hold up outside my own setup:
+- Laravel/Express routing errors, a Flutter+Stripe Android gotcha, Docker bind-mount permissions
+- Socket.io disconnects, a Cloudflare WAF bypass via self-hosted WARP, multi-tenant single-DB SaaS
+- Internal SSO, sync-selector catch-22, cold-cache page speed, git/deploy over an unstable network, OTP e-signatures, FCM push without the server SDK, idempotent payment webhooks
+
+The personal counterpart, [`patterns/field-notes-it.md`](patterns/field-notes-it.md),
+is my own deploy scripts, env var naming and VPS quirks, in Italian, kept as a
+worked example of a cross-project conventions file rather than as advice for you.
 
 ### 4. Methodological skills (`skills/`)
 
@@ -155,12 +160,13 @@ Deeper dive → [docs/comparison-2026.md](docs/comparison-2026.md)
 
 ## FAQ
 
-### Does Claude Code remember anything between sessions?
+### Doesn't Claude Code already have memory?
 
-Within a session, the context window remembers everything. Between sessions,
-nothing survives: the knowledge stays locked in each chat. This toolkit fixes
-that with a pipeline that compiles sessions into a living wiki and promotes
-mature knowledge to a stable KB that every future session can read.
+It does: auto memory is on by default and works well, per project, per
+machine. That is exactly its limit. Each repo accumulates its own notes, and
+what you learn in project A never reaches projects B through T. This toolkit
+adds the layer above: a cross-project wiki and a stable KB that every
+project's sessions can read, with an explicit promotion bar between the two.
 
 ### How is this different from CLAUDE.md?
 
@@ -214,8 +220,9 @@ claude-kb-workflow/
 │   ├── security.md              # JWT + Auth + CORS
 │   ├── realtime-dev.md          # Socket.io + WebSocket + MQTT
 │   └── ci-cd.md                 # GitHub Actions + Codemagic
-├── patterns/                    # 30 critical patterns
-│   └── critical-patterns.md
+├── patterns/                    # patterns + personal field notes
+│   ├── patterns.md              # 16 generalized patterns (English)
+│   └── field-notes-it.md        # personal conventions, Italian (worked example)
 ├── workflows/                   # Operational workflows
 │   └── common-tasks.md
 ├── skills/                      # 6 custom skills
@@ -269,7 +276,7 @@ Quick summary:
 See [CONTRIBUTING.md](CONTRIBUTING.md) (in Italian). In short:
 
 - New agent / skill → PR with a formatted SKILL.md + use-case description
-- New pattern → PR to `patterns/critical-patterns.md` with a real example
+- New pattern → PR to `patterns/patterns.md` if it holds up outside my setup, or to `patterns/field-notes-it.md` if it's a personal convention, with a real example
 - Trigger bugs / false positives → open an Issue with the prompt that failed
 - General feedback → GitHub Discussion
 
@@ -302,10 +309,11 @@ MIT. See [LICENSE](LICENSE). Fork it, modify it, redistribute it. If it's useful
 
 ## 🇮🇹 Per gli sviluppatori italiani
 
-> **Il sistema di memoria per Claude Code**: la pipeline di conoscenza wiki → KB
-> (pattern Karpathy, in produzione da aprile 2026 su 15+ progetti reali) che fa
-> sì che la sessione dopo parta da quello che ha imparato la precedente, con a corredo
-> 12 subagent orchestrati, 30 pattern pagati in produzione e 6 skill metodologiche.
+> **Conoscenza che attraversa i progetti.** La memoria nativa di Claude Code
+> è per-progetto e per-macchina: la lezione pagata su un repo non arriva mai
+> agli altri venti. Questo toolkit compila le sessioni in una wiki e promuove
+> una pagina alla KB stabile e trasversale solo quando supera una soglia in
+> cifre: **vista su 2+ progetti, 2+ sessioni, verificata in produzione.**
 >
 > Gli skills framework come [Superpowers](https://github.com/obra/superpowers), GSD e gstack
 > ti dicono *come eseguire* una sessione; questo toolkit si occupa di *cosa resta dopo*.

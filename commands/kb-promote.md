@@ -9,14 +9,15 @@ Promuovi il concetto specificato da `llm-wiki/wiki/concepts/` alla **KB stabile*
 - [ ] Appare in ≥ 2 progetti diversi
 - [ ] Stabile da ≥ 2 sessioni (controlla `wiki/log.md`)
 - [ ] Verificato in produzione (non solo teorico)
-- [ ] Non già presente in `$KB_PATH/patterns/critical-patterns.md`
+- [ ] Non già presente in `$KB_PATH/patterns/patterns.md` o `$KB_PATH/patterns/field-notes-it.md`
 
 ## Steps
 
 1. Leggi `$LLM_WIKI_PATH/wiki/concepts/[concetto].md`
 2. Verifica i criteri sopra — se non soddisfatti, avvisa l'utente e fermati
 3. Identifica destinazione in `$KB_PATH/`:
-   - Pattern critico cross-progetto → `patterns/critical-patterns.md` (aggiungi sezione)
+   - Pattern riusabile cross-progetto → `patterns/patterns.md` (aggiungi sezione)
+   - Convenzione personale (deploy, naming, provider) → `patterns/field-notes-it.md`
    - Pattern specifico per stack → aggiorna agente rilevante `agents/[agente].md`
    - Guida operativa → `knowledge-base/[NOME].md`
 4. Aggiungi il pattern con formato coerente agli altri (vedi convenzioni in `CONTRIBUTING.md`)

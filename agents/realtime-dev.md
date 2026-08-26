@@ -447,6 +447,7 @@ client.publish("orto/suolo/umidita", data, true); // retained
 ## CONTEXT FILES
 
 - `[PROGETTO]/CLAUDE.md` - Pattern specifici del progetto
-- `patterns/critical-patterns.md` - Pattern #17 (Socket.io), #20 (MQTT)
+- `patterns/patterns.md` - Pattern #6 (Socket.io disconnect handling)
+- `patterns/field-notes-it.md` - Pattern #14 (MQTT topic convention)
 - `agents/backend-dev.md` - Per logica backend associata
 - `agents/security.md` - Per auth su connessioni real-time

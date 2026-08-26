@@ -84,7 +84,7 @@ brainstorming → writing-plans → executing-plans → test-driven-development
 
 ```
 12 subagent (2 orchestratori + 10 specialisti) (cosa fare per stack)
-+ 30 pattern critici (cosa evitare, da esperienza reale)
++ 16 pattern (cosa evitare, generalizzati da esperienza reale)
 + 6 skill metodologiche (come ragionare, leggermente)
 + Sistema KB-driven (come accumulare conoscenza nel tempo)
 ```
@@ -168,7 +168,7 @@ In sostanza: 9 skill su 14 di Superpowers sono **duplicate da funzionalità nati
 | Feature kb-workflow | Stato in Superpowers |
 |---------------------|----------------------|
 | **12 subagent (2 orchestratori + 10 specialisti) per stack specifici** | Non presenti — Superpowers è stack-agnostic |
-| **30 pattern critici da produzione reale** | Non presenti |
+| **16 pattern generalizzati da produzione reale** | Non presenti |
 | **`deploy-production-skill`** (Docker+Traefik) | Non presente |
 | **`flutter-production-skill`** (Firebase, streaming, push) | Non presente |
 | **`educational-presentation-skill`** (slide didattiche) | Non presente |

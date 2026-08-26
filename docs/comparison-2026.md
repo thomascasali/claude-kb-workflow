@@ -89,7 +89,7 @@ brainstorming → writing-plans → executing-plans → test-driven-development
 
 ```
 12 subagents (2 orchestrators + 10 specialists) (what to do per stack)
-+ 30 critical patterns (what to avoid, from real experience)
++ 16 patterns (what to avoid, generalized from real experience)
 + 6 methodological skills (how to reason, lightly)
 + KB-driven system (how to accumulate knowledge over time)
 ```
@@ -178,7 +178,7 @@ native features** or covered by other toolkits. That's why
 | kb-workflow feature | Status in Superpowers |
 |---------------------|----------------------|
 | **12 subagents (2 orchestrators + 10 specialists) for specific stacks** | Not present — Superpowers is stack-agnostic |
-| **30 critical patterns from real production** | Not present |
+| **16 patterns generalized from real production** | Not present |
 | **`deploy-production-skill`** (Docker+Traefik) | Not present |
 | **`flutter-production-skill`** (Firebase, streaming, push) | Not present |
 | **`educational-presentation-skill`** (teaching slides) | Not present |

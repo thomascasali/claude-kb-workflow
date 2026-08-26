@@ -40,7 +40,7 @@ fi
 echo ""
 echo -e "${YELLOW}Questo installerà nel tuo Claude Code:${NC}"
 echo "  - 12 subagent (2 orchestratori + 10 specialisti), con frontmatter YAML (agents/)"
-echo "  - 30 pattern critici (patterns/)"
+echo "  - 16 pattern generalizzati + convenzioni personali IT (patterns/)"
 echo "  - Workflow comuni (workflows/)"
 echo "  - 6 skill custom (skills/)"
 echo "  - 5 comandi /kb-* (commands/)"
@@ -79,7 +79,7 @@ echo "    e li sceglie automaticamente in base alla description, nessuna registr
 echo -e "${YELLOW}[2/5] Installando patterns...${NC}"
 mkdir -p "$CLAUDE_HOME/patterns"
 cp -f "$REPO_DIR/patterns/"*.md "$CLAUDE_HOME/patterns/"
-echo "  ✓ $(ls "$REPO_DIR/patterns/"*.md | wc -l) file di pattern installati (30 pattern critici)"
+echo "  ✓ $(ls "$REPO_DIR/patterns/"*.md | wc -l) file di pattern installati (16 pattern generalizzati + convenzioni personali IT)"
 
 # 3. Workflows
 echo -e "${YELLOW}[3/5] Installando workflows...${NC}"

@@ -1,6 +1,6 @@
 # claude-kb-workflow
 
-> Open-source memory system for Claude Code: a three-tier pipeline (sessions → LLM wiki → stable KB) where knowledge is promoted only after being verified in production on 2+ projects. Running since April 2026 on 15+ live products. 12 orchestrated subagents, 30 battle-tested patterns, 6 methodological skills. English docs, native Italian included. MIT license.
+> Open-source knowledge pipeline for Claude Code, for people who maintain many unrelated projects alone. Claude Code's native memory is per-project and per-machine; this toolkit adds the cross-project layer: sessions → LLM wiki → stable KB, with a numeric promotion bar (seen on 2+ projects, 2+ sessions, verified in production). Ships orchestrated subagents, production patterns, methodological skills, and a documented restore dry-run that failed. English docs, native Italian included. MIT license.
 
 ## Docs
 
@@ -9,7 +9,7 @@
 - [Orchestration](docs/orchestration.md): lead + subagents, mandatory reviewer gate, the corrupted-frontmatter story
 - [Knowledge disaster recovery](docs/knowledge-disaster-recovery.md): making a dev setup 100% restorable, the restore dry-run
 - [2026 comparison](docs/comparison-2026.md): vs Superpowers/GSD/gstack (complementary, not competing)
-- [Critical patterns](patterns/critical-patterns.md): 30 production patterns
+- [Patterns](patterns/patterns.md): 16 generalized production patterns
 
 ## Italiano
 

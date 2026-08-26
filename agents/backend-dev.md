@@ -435,7 +435,7 @@ logger.error(`Errore: ${error.message}`);
 ## CONTEXT FILES
 
 ```
-~/.claude/patterns/critical-patterns.md  # Pattern critici
+~/.claude/patterns/patterns.md           # Pattern generali
 ~/.claude/agents/backend-dev.md          # Questo file
 [PROGETTO]/CLAUDE.md                     # Context progetto
 [PROGETTO]/CONTEXT.md                    # Credenziali

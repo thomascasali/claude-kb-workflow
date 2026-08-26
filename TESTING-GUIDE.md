@@ -269,7 +269,7 @@ Questo è il feedback più utile! Apri una Issue su GitHub con:
 
 Se sei studente (o stai imparando lo sviluppo software), questo toolkit ti offre 4 cose oltre alla pura utility:
 
-1. **Pattern reali di produzione**: i 30 pattern in `patterns/critical-patterns.md` sono bug che hanno fatto perdere ore di lavoro a sviluppatori veri. Leggerli ti vaccina.
+1. **Pattern reali di produzione**: i 16 pattern in `patterns/patterns.md` sono bug che hanno fatto perdere ore di lavoro a sviluppatori veri. Leggerli ti vaccina.
 
 2. **Esempi di codice ben strutturato**: ogni agente ha pattern e antipattern con esempi. Ottimo materiale di studio.
 

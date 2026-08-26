@@ -96,17 +96,20 @@ Target: team da 5-20 persone, prezzo €8/utente/mese.
 
 ## 🚨 Pattern critici applicabili
 
-Pattern dal repo `claude-kb-workflow/patterns/critical-patterns.md`:
+Pattern generali dal repo `claude-kb-workflow/patterns/patterns.md`:
+
+- [x] #1 — Laravel: AdminMiddleware invece di auth:api + admin
+- [x] #5 — Laravel config:cache dopo modifiche .env
+- [x] #7 — Docker bind mount permessi sovrascritti
+
+Convenzioni personali da `claude-kb-workflow/patterns/field-notes-it.md`:
 
 - [x] #1 — deploy.sh è LOCALE
 - [x] #2 — Git → deploy workflow obbligatorio
 - [x] #3 — Frontend è build statico (rebuild dopo modifiche)
 - [x] #4 — VITE_API_URL senza doppio /api
-- [x] #5 — Laravel: AdminMiddleware invece di auth:api + admin
-- [x] #12 — Deploy flags per performance
-- [x] #15 — File da non committare (CONTEXT.md, .env)
-- [x] #16 — Laravel config:cache dopo modifiche .env
-- [x] #21 — Docker bind mount permessi sovrascritti
+- [x] #8 — Deploy flags per performance
+- [x] #11 — File da non committare (CONTEXT.md, .env)
 
 ---
 
@@ -115,7 +118,7 @@ Pattern dal repo `claude-kb-workflow/patterns/critical-patterns.md`:
 - ❌ Non modificare lo schema `subscriptions` senza coordinare con il team Stripe — il webhook handler è strettamente accoppiato
 - ❌ Non eseguire `php artisan migrate:fresh` in staging senza aver fatto un dump prima — staging ha dati reali di test acquisiti
 - ❌ Non disabilitare il rate limiting su `/api/auth/login` — abbiamo subito tentativi di credential stuffing nel marzo 2025
-- ❌ Non aggiungere `@route` dinamiche dopo le `:id` route (vedi pattern #6)
+- ❌ Non aggiungere `@route` dinamiche dopo le `:id` route (vedi patterns.md #2)
 
 ---
 

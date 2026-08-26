@@ -50,7 +50,7 @@ description: Frase imperativa che descrive quando attivare. Da usare quando l'ut
 
 ### 📐 Nuovo pattern
 
-Un pattern è un **lesson learned da produzione**. Va in `patterns/critical-patterns.md`.
+Un pattern è un **lesson learned da produzione**. Se regge fuori dal mio setup specifico va in `patterns/patterns.md`; se è una convenzione personale (script di deploy, naming env, provider VPS) va in `patterns/field-notes-it.md`.
 
 **Criteri di accettazione**:
 - ✅ Hai osservato il pattern in **almeno 2 progetti diversi**

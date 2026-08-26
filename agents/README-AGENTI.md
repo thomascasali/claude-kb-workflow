@@ -9,7 +9,7 @@
 1. **Identifica il task** -> Scegli l'agente dal Decision Tree
 2. **Leggi l'agente** -> `~/.claude/agents/[agente].md`
 3. **Integra con progetto** -> Combina con CLAUDE.md del progetto specifico
-4. **Segui i pattern** -> `~/.claude/patterns/critical-patterns.md`
+4. **Segui i pattern** -> `~/.claude/patterns/patterns.md` (+ `field-notes-it.md` per le mie convenzioni)
 
 ---
 
@@ -143,7 +143,8 @@ NON SO?
 |   |-- reviewer.md             # Debug/Code Review (gate)
 |   |-- security.md             # JWT/Auth/CORS
 |-- patterns/
-|   |-- critical-patterns.md    # Pattern critici cross-progetto
+|   |-- patterns.md             # Pattern generalizzati, riusabili (EN)
+|   |-- field-notes-it.md       # Convenzioni personali, esempio (IT)
 |-- workflows/
 |   |-- common-tasks.md         # Workflow comuni
 ```
@@ -157,7 +158,7 @@ NON SO?
 3. **Leggi sempre CONTEXT.md** - Contiene credenziali e password
 4. **Segui le checklist** dell'agente prima di committare
 5. **Stack detection** - Ogni agente ha sezioni [Laravel] e [Node.js] o equivalenti
-6. **Pattern critici** -> `~/.claude/patterns/critical-patterns.md`
+6. **Pattern** -> `~/.claude/patterns/patterns.md`
 7. **deploy.sh e' LOCALE** - Mai eseguirlo sul VPS!
 
 ---

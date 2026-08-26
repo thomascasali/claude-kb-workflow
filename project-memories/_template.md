@@ -75,7 +75,7 @@
 
 ## 🚨 Pattern critici applicabili
 
-Lista dei pattern dal repo `claude-kb-workflow/patterns/critical-patterns.md` che si applicano a questo progetto:
+Lista dei pattern dal repo `claude-kb-workflow/patterns/patterns.md` (o convenzioni personali in `field-notes-it.md`) che si applicano a questo progetto:
 
 - [ ] #N — [Nome pattern] (es: VITE_API_URL)
 - [ ] #N — ...
