@@ -47,7 +47,7 @@ Queste frasi indicano che stai per dichiarare done senza prova.
 - **Modifiche backend (Laravel/Node)**: esegui i test rilevanti + un curl reale o chiamata dell'endpoint
 - **Modifiche frontend (Vue/React)**: build + caricamento pagina nel browser (non solo HMR)
 - **Modifiche Flutter**: `flutter analyze` + build release per la piattaforma toccata
-- **Modifiche Docker/Traefik**: `docker compose config` + `docker compose up` + curl al servizio esposto
+- **Modifiche Docker/Traefik**: `docker compose config` + `docker compose up` in ambiente locale o di staging + curl al servizio esposto
 - **Modifiche KB / project-memory**: rileggi il file dopo la scrittura, verifica frontmatter valido
 - **Modifiche presentazioni didattiche**: build + apertura in browser, verifica che le slide non siano vuote o rotte
 - **Commit/push**: dopo il push, verifica con `git log origin/<branch>` che il commit sia arrivato
