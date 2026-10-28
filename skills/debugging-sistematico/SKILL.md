@@ -21,7 +21,9 @@ description: Risolvi un bug, errore o comportamento inatteso trovando la causa r
 Prima di proporre QUALSIASI fix:
 
 - Leggi l'errore per intero (stack trace completo, non solo la prima riga)
-- Riproduci il bug in modo consistente — se non lo riproduci, non lo hai capito
+- **Comando rosso obbligatorio**: nessuna ipotesi finché non esiste un comando (test, curl, script) che riproduce il bug e fallisce. Se non riesci a scriverlo, non hai ancora capito il bug
+- Dopo il fix lo stesso comando deve passare: è la prova, non una rilettura del codice
+- Log di debug sempre con un tag univoco (es. `[DEBUG-a3f9]`); prima di chiudere `grep -rn "DEBUG-a3f9"` e rimuovili tutti
 - Controlla i commit recenti (`git log --oneline -20`, `git diff HEAD~5`) per identificare la regressione
 - Traccia il flusso dei dati **a ritroso** dall'errore fino alla sorgente
 - Attraversa i confini di sistema: frontend → API → DB, app → servizio → log
@@ -65,3 +67,5 @@ Se ti senti pensare:
 - Aggiornare dipendenze sperando che il bug sparisca
 - Suggerire all'utente "prova a riavviare" senza diagnosi
 - Dichiarare risolto senza eseguire il caso di riproduzione
+
+Idee adattate da mattpocock/skills@59db609 (MIT, © 2026 Matt Pocock).

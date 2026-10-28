@@ -41,6 +41,8 @@ Chiedi UNA cosa alla volta, preferibilmente con AskUserQuestion + opzioni concre
 - Vincoli: tempo, budget complessità, dipendenze già presenti
 - Criterio di successo: come riconosciamo "fatto bene"
 
+Ogni domanda arriva con la tua risposta consigliata e il motivo (una riga), formulata in modo che "sì" basti ad accettarla.
+
 ❌ Non fare interrogatori da 8 domande in un colpo.
 ✅ 2-3 domande chiave bastano per il 90% dei casi.
 
@@ -85,3 +87,5 @@ Per nuove presentazioni della didattica ITIS, allineati prima su:
 - Tono (formale, interattivo, esempi pratici)
 
 Esiste già il pattern `educational-presentation-skill` — applicalo invece di reinventare.
+
+Idee adattate da mattpocock/skills@59db609 (MIT, © 2026 Matt Pocock).

@@ -42,6 +42,14 @@ Queste frasi indicano che stai per dichiarare done senza prova.
 | "L'ho già verificato 10 minuti fa" | Lo stato può essere cambiato — rifai |
 | "Ho fretta" | Falsi positivi costano più tempo di una verifica |
 
+## Test che valgono qualcosa
+
+Un test verde che non può fallire non prova nulla. Evita:
+- **Test sull'implementazione**: asserire chiamate interne o campi privati invece dell'output osservabile (Pest/PHPUnit: `shouldReceive` su un metodo interno; Jest/Vitest: `toHaveBeenCalledWith` su helper; flutter_test: leggere lo state del widget invece di `find.text`)
+- **Test tautologici**: l'atteso è calcolato con la stessa logica del codice, o l'assert è sempre vero (`expect(true).toBe(true)`). Prova: rompi il codice, il test deve diventare rosso
+- **Mock ovunque**: mocka solo i confini esterni (rete, tempo, servizi terzi), mai i tuoi moduli
+- **Fette orizzontali**: tutti i test prima, tutto il codice poi. Meglio fette verticali: un comportamento, un test, il minimo codice, poi il successivo
+
 ## Casi specifici del workflow
 
 - **Modifiche backend (Laravel/Node)**: esegui i test rilevanti + un curl reale o chiamata dell'endpoint
@@ -60,3 +68,5 @@ Non serve verifica per:
 - Quando l'utente dice "non testare, voglio solo vedere il diff"
 
 In tutti gli altri casi: **se hai modificato, verifica**.
+
+Idee adattate da mattpocock/skills@59db609 (MIT, © 2026 Matt Pocock).

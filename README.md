@@ -298,7 +298,7 @@ MIT. See [LICENSE](LICENSE). Fork it, modify it, redistribute it. If it's useful
 
 ## Credits
 
-- **Methodological skills** (`debugging-sistematico`, `verifica-prima-di-completare`, `brainstorming-design`) adapted from [obra/superpowers](https://github.com/obra/superpowers) (MIT)
+- **Methodological skills** (`debugging-sistematico`, `verifica-prima-di-completare`, `brainstorming-design`) adapted from [obra/superpowers](https://github.com/obra/superpowers) (MIT) and [mattpocock/skills](https://github.com/mattpocock/skills) (MIT)
 - **Two-tier KB-driven pattern** inspired by Andrej Karpathy's discussions on managing LLM knowledge
 - **Agent architecture** evolved from years of real work on web/mobile/IoT projects
 
