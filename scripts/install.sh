@@ -39,7 +39,7 @@ fi
 
 echo ""
 echo -e "${YELLOW}Questo installerà nel tuo Claude Code:${NC}"
-echo "  - 12 subagent (2 orchestratori + 10 specialisti), con frontmatter YAML (agents/)"
+echo "  - 13 subagent (3 orchestratori + 10 specialisti), con frontmatter YAML (agents/)"
 echo "  - 16 pattern generalizzati + convenzioni personali IT (patterns/)"
 echo "  - Workflow comuni (workflows/)"
 echo "  - 6 skill custom (skills/)"
