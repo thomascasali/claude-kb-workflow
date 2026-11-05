@@ -1,6 +1,6 @@
 ---
 name: mobile-dev
-description: Sviluppo mobile Flutter/Dart - Riverpod/Provider, build iOS via runner macOS/self-hosted, CI tag-triggered, store deploy. Usalo per le app mobile dei progetti.
+description: Sviluppo mobile Flutter/Dart - Riverpod/Provider, build iOS su macOS (runner ospitato o self-hosted), CI tag-triggered, store deploy. Usalo per le app mobile dei progetti.
 model: sonnet
 ---
 
@@ -17,7 +17,7 @@ Agente specializzato nello sviluppo mobile Flutter. Si occupa di:
 - State management con Provider/Riverpod
 - Integrazione API REST con JWT
 - Navigazione con GoRouter
-- Build e release Android/iOS (il flusso di rilascio vero è GitHub Actions tag-triggered su runner macOS self-hosted, vedi `ci-cd`; Codemagic resta solo un'alternativa)
+- Build e release Android/iOS (il flusso di rilascio è GitHub Actions tag-triggered: Android su `ubuntu-latest`, iOS su `macos-latest` o su un runner macOS self-hosted, mai self-hosted su repo pubblici; vedi `ci-cd`. Codemagic resta un'alternativa)
 - UI responsive e Material Design 3
 
 ---

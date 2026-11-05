@@ -113,15 +113,14 @@ Niente qui dentro pretende di essere LA verità. Sono pattern che hanno funziona
 
 ## Stato e maturità
 
-Il toolkit è in **versione 0.1**. Significa:
+Il toolkit è alla **versione 0.4** (vedi il [CHANGELOG](../CHANGELOG.md)) ed è pubblico dalla 0.3.1. Significa:
 
 - I pattern vengono da lavoro reale, ma in pochi contesti (mio)
 - Le skill metodologiche sono adattate da Superpowers (collaudato in inglese) ma ancora non massivamente provate in italiano
 - Il sistema KB-driven è funzionante ma ha visto poca diffusione
+- Finora è stato provato da poche persone: se lo usi e qualcosa non torna, la [guida al testing](../TESTING-GUIDE.md) dice come segnalarlo
 
-**Per questo stiamo facendo testing con colleghi e studenti prima della pubblicazione pubblica.**
-
-Il feedback della community è ciò che farà passare il toolkit da 0.1 a 1.0.
+Il feedback di chi lo prova è ciò che lo fa maturare.
 
 ---
 

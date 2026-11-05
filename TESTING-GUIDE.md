@@ -1,6 +1,6 @@
 # Guida al Test di claude-kb-workflow
 
-> Questa guida è pensata per **colleghi e studenti** che vogliono provare il toolkit nei propri progetti e fornire feedback prima della pubblicazione pubblica.
+> Questa guida è pensata per **colleghi e studenti** che vogliono provare il toolkit nei propri progetti e fornire feedback.
 >
 > Tempo richiesto: **30-45 minuti per il primo test completo**, poi uso quotidiano per qualche giorno.
 

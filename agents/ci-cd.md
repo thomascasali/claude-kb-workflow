@@ -1,12 +1,12 @@
 ---
 name: ci-cd
-description: CI/CD e release - GitHub Actions tag-triggered, build Flutter iOS/Android sul runner macOS self-hosted (Codemagic solo come alternativa), firma, store deploy, secrets di pipeline. Usalo per pipeline e rilasci.
+description: CI/CD e release - GitHub Actions tag-triggered, build Flutter con Android su runner ospitato e iOS su macOS (ospitato o self-hosted), Codemagic come alternativa, firma, store deploy, secrets di pipeline. Usalo per pipeline e rilasci.
 model: sonnet
 ---
 
 # AGENTE: CI/CD Engineer
 
-> **Specializzazione**: GitHub Actions, runner macOS self-hosted, Release Automation, Store Deployment
+> **Specializzazione**: GitHub Actions, runner ospitati e self-hosted, Release Automation, Store Deployment
 
 ---
 
@@ -14,8 +14,8 @@ model: sonnet
 
 Agente specializzato in continuous integration e delivery. Supporta:
 - **GitHub Actions** - Build, test, deploy per tutti i progetti
-- **Self-hosted Runners** - runner macOS self-hosted: il flusso primario per le app mobile (iOS e Android)
-- **Codemagic** - solo alternativa, per chi non ha un Mac da usare come runner
+- **Runner** - Android su `ubuntu-latest`; iOS su `macos-latest` (ospitato) o su un runner macOS self-hosted, solo per repo privati
+- **Codemagic** - alternativa per iOS, per chi non vuole usare un runner macOS
 - **Tag-triggered Releases** - Versioning semantico con deploy automatico
 - **Store Deployment** - Play Store, App Store/TestFlight
 
@@ -90,15 +90,23 @@ jobs:
 
 ### Workflow Flutter: Tag-Triggered Release (pattern progetti mobile)
 
-Il flusso primario: un tag `v*` fa partire la build sul runner macOS self-hosted, che compila sia
-Android sia iOS. Scelte da non perdere, tutte lezioni già pagate:
-- `runs-on: [self-hosted, macOS]`; non installare Flutter con `subosito/flutter-action` sul runner,
-  usa quello della macchina e confronta la versione con un file `.flutter-version` nel repo;
+Un tag `v*` fa partire le build. Android gira su un runner ospitato, iOS richiede macOS.
+Scelte da non perdere, tutte lezioni già pagate:
+- Android: `runs-on: ubuntu-latest` e Flutter installato con `subosito/flutter-action`, alla versione
+  scritta in un file `.flutter-version` nel repo;
+- iOS: `runs-on: macos-latest` (ospitato) come default. Un runner macOS self-hosted è l'alternativa:
+  lì Flutter è quello della macchina, quindi confronta la sua versione con `.flutter-version`;
+- **non usare runner self-hosted su repo pubblici**: una pull request può far eseguire codice
+  arbitrario sulla tua macchina. Usali solo su repo privati;
 - quality gate (analyze, test) prima delle build;
 - build number Android = 1000 + `run_number`, mai il `run_number` nudo;
-- Play: test chiuso (`track: alpha`) con `status: completed`, non `internal` lasciato in bozza;
-- iOS: keychain temporaneo per job e un lock di firma se più job usano lo stesso runner;
-- secret passati in `env:`, mai interpolati nella shell; cleanup con `if: always()`.
+- Play: test chiuso (`track: alpha`) con `status: completed`, non lasciato in bozza. Su un'app ancora
+  in bozza `completed` viene rifiutato: usa `status: draft` finché la prima release non è
+  confermata dalla console. `releaseName` è obbligatorio: senza, la release eredita il nome della
+  bozza sostituita;
+- iOS: keychain temporaneo per job e, se più job usano lo stesso runner, un lock di firma
+  (qui un gruppo `concurrency`). Il cleanup gira sempre, con `if: always()`;
+- secret passati in `env:`, mai interpolati nella shell.
 
 ```yaml
 # .github/workflows/build-release.yml
@@ -108,15 +116,17 @@ on:
     tags: ['v*']  # Trigger su tag v1.0.0, v1.2.3, etc.
 
 jobs:
-  # === ANDROID ===
+  # === ANDROID (runner ospitato) ===
   android:
-    runs-on: [self-hosted, macOS]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verifica versione Flutter
-        run: |
-          test "$(flutter --version | head -1 | awk '{print $2}')" = "$(cat .flutter-version)"
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .flutter-version   # oppure: flutter-version: '3.x.y'
+          cache: true
 
       - name: Quality gate
         working-directory: mobile
@@ -127,16 +137,18 @@ jobs:
 
       - name: Get version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
 
       - name: Build AAB
         working-directory: mobile
+        env:
+          VERSION: ${{ steps.version.outputs.VERSION }}
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
-          flutter pub get
           flutter build appbundle \
             --release \
-            --build-name=${{ steps.version.outputs.VERSION }} \
-            --build-number=$((1000 + ${{ github.run_number }}))
+            --build-name="$VERSION" \
+            --build-number=$((1000 + RUN_NUMBER))
 
       - name: Upload to Play Store
         uses: r0adkll/upload-google-play@v1
@@ -144,44 +156,97 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}
           packageName: ${{ secrets.ANDROID_PACKAGE_NAME }}
           releaseFiles: mobile/build/app/outputs/bundle/release/app-release.aab
+          releaseName: ${{ steps.version.outputs.VERSION }}
           track: alpha     # test chiuso
-          status: completed
+          status: completed  # app ancora in bozza: status: draft
 
-  # === iOS ===
+  # === iOS (macOS) ===
   ios:
-    runs-on: [self-hosted, macOS]
+    runs-on: macos-latest   # alternativa: [self-hosted, macOS], solo su repo privati
+    # Lock di firma: un solo job iOS alla volta, così nessun altro job sostituisce
+    # la lista dei keychain a metà firma. Vale per i job di questo repo.
+    concurrency:
+      group: ios-signing
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verifica versione Flutter
-        run: |
-          test "$(flutter --version | head -1 | awk '{print $2}')" = "$(cat .flutter-version)"
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .flutter-version
+          cache: true
+        # Su self-hosted togli questo step e confronta la versione della macchina:
+        # test "$(flutter --version | head -1 | awk '{print $2}')" = "$(cat .flutter-version)"
 
       - name: Get version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Keychain temporaneo, certificato e profilo
+        env:
+          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+          CERT_P12_BASE64: ${{ secrets.IOS_CERT_P12_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
+          PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          KEYCHAIN="$RUNNER_TEMP/build-$GITHUB_RUN_ID.keychain-db"
+          echo "KEYCHAIN=$KEYCHAIN" >> "$GITHUB_ENV"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          echo "$CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -P "$CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          # Lista dei keychain riaffermata: il temporaneo per primo.
+          security list-keychains -d user -s "$KEYCHAIN" login.keychain-db
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          echo "$PROFILE_BASE64" | base64 --decode \
+            > "$HOME/Library/MobileDevice/Provisioning Profiles/build.mobileprovision"
 
       - name: Install CocoaPods
-        working-directory: mobile/ios
-        run: pod install
+        working-directory: mobile
+        run: |
+          flutter pub get
+          cd ios && pod install
 
       - name: Build IPA
         working-directory: mobile
+        env:
+          VERSION: ${{ steps.version.outputs.VERSION }}
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
           flutter build ipa \
             --release \
-            --build-name=${{ steps.version.outputs.VERSION }} \
-            --build-number=${{ github.run_number }} \
+            --build-name="$VERSION" \
+            --build-number="$RUN_NUMBER" \
             --export-options-plist=ios/ExportOptions.plist
 
       - name: Upload to TestFlight
+        env:
+          API_KEY_ID: ${{ secrets.APP_STORE_API_KEY_ID }}
+          API_ISSUER: ${{ secrets.APP_STORE_ISSUER_ID }}
+          API_KEY_P8: ${{ secrets.APP_STORE_API_KEY_P8 }}
         run: |
+          mkdir -p "$RUNNER_TEMP/private_keys"
+          printf '%s' "$API_KEY_P8" > "$RUNNER_TEMP/private_keys/AuthKey_${API_KEY_ID}.p8"
+          export API_PRIVATE_KEYS_DIR="$RUNNER_TEMP/private_keys"
           xcrun altool --upload-app \
             --type ios \
             --file mobile/build/ios/ipa/*.ipa \
-            --apiKey ${{ secrets.APP_STORE_API_KEY_ID }} \
-            --apiIssuer ${{ secrets.APP_STORE_ISSUER_ID }}
+            --apiKey "$API_KEY_ID" \
+            --apiIssuer "$API_ISSUER"
+
+      - name: Pulizia
+        if: always()
+        run: |
+          [ -n "${KEYCHAIN:-}" ] && security delete-keychain "$KEYCHAIN" || true
+          rm -f "$RUNNER_TEMP/cert.p12" "$RUNNER_TEMP"/private_keys/AuthKey_*.p8
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/build.mobileprovision"
 ```
+
+Il workflow non è stato eseguito qui: adatta nomi dei secret, percorso `mobile/` e
+`ExportOptions.plist` al tuo progetto prima del primo tag.
 
 ### Workflow Laravel: Backend + Frontend Deploy
 
@@ -227,7 +292,7 @@ jobs:
 
 ## ALTERNATIVA: CODEMAGIC (Flutter iOS/Android)
 
-Non è il flusso primario. Serve se non hai un Mac da usare come runner. Per tutto il resto vale il workflow GitHub Actions qui sopra.
+Non è il flusso primario. Serve se non vuoi usare un runner macOS ospitato o self-hosted. Per tutto il resto vale il workflow GitHub Actions qui sopra.
 
 ### codemagic.yaml
 

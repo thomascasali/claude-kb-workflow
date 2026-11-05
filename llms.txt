@@ -5,7 +5,7 @@
 ## Docs
 
 - [README](README.md): overview, quick start, FAQ
-- [KB-driven workflow](docs/kb-driven-workflow.md): the three-tier pipeline, the 5 commands, the promotion gate
+- [KB-driven workflow](docs/kb-driven-workflow.md): the three-tier pipeline, the 5 commands, the promotion exam
 - [Orchestration](docs/orchestration.md): lead + subagents, three model tiers (Haiku, Sonnet, Opus), mandatory reviewer gate, the corrupted-frontmatter story
 - [Knowledge disaster recovery](docs/knowledge-disaster-recovery.md): making a dev setup 100% restorable, the restore dry-run
 - [2026 comparison](docs/comparison-2026.md): vs Superpowers/GSD/gstack (complementary, not competing)

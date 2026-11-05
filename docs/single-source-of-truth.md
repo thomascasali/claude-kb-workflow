@@ -28,7 +28,7 @@ information, which place is the source, and what the other places are allowed to
 | **Post-mortem or dated lesson** | `wiki/lessons/` | log: one line |
 | **Chronology and history** | a summary page in the wiki, plus git | nothing |
 | **Secrets** | the password manager, or the server's `.env` | everywhere else: only where the secret lives, never its value |
-| **Note from a temporary session** (for example a cloud or throwaway one) | `docs/kb-handoff/` in the project repo | folded into the wiki at the next local ingest, then removed |
+| **Note from a temporary session** (for example a cloud or throwaway one) | `docs/kb-handoff/` in the project repo | folded into the wiki by hand (`/kb-ingest` does not read `docs/kb-handoff/`), then removed |
 
 `wiki/infra/` is not in the starter template. Create it when you have shared resources to inventory.
 
@@ -36,7 +36,7 @@ information, which place is the source, and what the other places are allowed to
 
 1. **Link, don't copy.** If you catch yourself pasting a version number into a second file, replace it with a link.
 2. **State and facts are different files.** "What is live today" changes weekly and sits in the wiki. "What stack it runs on" changes rarely and sits in the project memory.
-3. **A promoted concept becomes a stub.** After `/kb-promote`, the wiki concept keeps a short pointer to the KB guide, and new gotchas are written only in the guide. See the [KB-driven workflow](kb-driven-workflow.md).
+3. **A promoted concept stays in the wiki with a pointer note.** `/kb-promote` adds a "Promoted to ..." line with the destination to the concept, and an entry in the log. It does not empty the concept: keeping new gotchas out of it, and writing them only in the guide, is up to you. See the [KB-driven workflow](kb-driven-workflow.md).
 4. **Auto-memory stays small.** Claude Code's auto-memory is for feedback and preferences. If a fact belongs in one of the rows above, write it there.
 5. **Secrets are the exception that proves the rule.** Even the pointer says where the secret is, not what it is.
 

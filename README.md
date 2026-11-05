@@ -15,9 +15,9 @@
 **claude-kb-workflow** is an open-source knowledge pipeline for Claude Code
 (sessions → LLM wiki → stable KB, in the Karpathy wiki tradition) for people
 who maintain many unrelated projects alone. It ships with orchestrated
-subagents, production patterns, and methodological skills, plus the piece
-almost nobody publishes: [a restore dry-run that failed](docs/knowledge-disaster-recovery.md),
-with the four silent gaps it exposed. Docs in English and Italian.
+subagents, production patterns, and methodological skills, plus a write-up of
+[a restore dry-run that failed](docs/knowledge-disaster-recovery.md), with the
+four silent gaps it exposed. Docs in English and Italian.
 
 [🇮🇹 Versione italiana più sotto](#-per-gli-sviluppatori-italiani)
 
@@ -213,6 +213,8 @@ claude-kb-workflow/
 ├── TESTING-GUIDE.md             # Guide for people who want to test the toolkit
 ├── CONTRIBUTING.md              # How to contribute
 ├── LICENSE                      # MIT
+├── .githooks/                   # pre-commit hook: secret scan on staged files
+├── .gitattributes               # LF line endings for scripts, hook and scanner rules
 ├── agents/                      # 13 subagents with frontmatter
 │   ├── README-AGENTI.md         # Decision tree + orchestration
 │   ├── quick-worker.md          # Haiku: small, closed jobs (default)
@@ -227,7 +229,7 @@ claude-kb-workflow/
 │   ├── integrations.md          # Stripe, Email, Google, Push, AI
 │   ├── security.md              # JWT + Auth + CORS
 │   ├── realtime-dev.md          # Socket.io + WebSocket + MQTT
-│   └── ci-cd.md                 # GitHub Actions on a self-hosted macOS runner (Codemagic as alternative)
+│   └── ci-cd.md                 # GitHub Actions: Android on a hosted runner, iOS on macOS (Codemagic as alternative)
 ├── patterns/                    # patterns + personal field notes
 │   ├── patterns.md              # 16 generalized patterns (English)
 │   └── field-notes-it.md        # personal conventions, Italian (worked example)

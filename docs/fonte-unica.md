@@ -28,7 +28,7 @@ per ogni tipo di informazione, qual è la fonte e cosa possono contenere gli alt
 | **Post-mortem o lezione datata** | `wiki/lessons/` | log: una riga |
 | **Cronologia e panoramica storica** | una pagina di riepilogo nella wiki, più git | niente |
 | **Secret** | il password manager, o il `.env` sul server | ovunque altrove: solo dove stanno, mai il valore |
-| **Nota da sessione temporanea** (per esempio cloud o usa-e-getta) | `docs/kb-handoff/` nel repo del progetto | consolidata nella wiki al prossimo ingest locale, poi rimossa |
+| **Nota da sessione temporanea** (per esempio cloud o usa-e-getta) | `docs/kb-handoff/` nel repo del progetto | consolidata nella wiki a mano (`/kb-ingest` non legge `docs/kb-handoff/`), poi rimossa |
 
 `wiki/infra/` non c'è nel template di partenza. Creala quando hai risorse condivise da inventariare.
 
@@ -36,7 +36,7 @@ per ogni tipo di informazione, qual è la fonte e cosa possono contenere gli alt
 
 1. **Link, non copia.** Se stai per incollare un numero di versione in un secondo file, metti un link.
 2. **Stato e fatti sono file diversi.** "Cosa è live oggi" cambia ogni settimana e sta nella wiki. "Su che stack gira" cambia di rado e sta nella project memory.
-3. **Un concept promosso diventa uno stub.** Dopo `/kb-promote` il concept in wiki tiene un breve rimando alla guida KB, e i nuovi gotcha si scrivono solo nella guida. Vedi il [workflow KB-driven](workflow-kb-driven.md).
+3. **Un concept promosso resta in wiki con una nota di rimando.** `/kb-promote` aggiunge al concept la riga "Promosso a ..." con la destinazione e una voce nel log. Non lo svuota: sta a te non duplicarvi i nuovi gotcha, che si scrivono solo nella guida. Vedi il [workflow KB-driven](workflow-kb-driven.md).
 4. **L'auto-memory resta piccola.** Quella di Claude Code serve per feedback e preferenze. Se un fatto appartiene a una riga qui sopra, scrivilo lì.
 5. **I secret sono l'eccezione.** Anche il rimando dice dove sta il secret, non cosa contiene.
 

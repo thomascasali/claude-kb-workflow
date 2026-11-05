@@ -1,7 +1,7 @@
 # MEMORY: [Nome Progetto]
 
 > **Aggiornato**: YYYY-MM-DD
-> **Stato**: development | staging | production | maintenance | archived
+> **Stato**: vedi la pagina del progetto nella wiki (`wiki/projects/<progetto>.md`), non qui
 > **Tags**: #stack-principale #dominio
 
 ---
@@ -58,18 +58,11 @@
 
 ---
 
-## 📋 Stato attuale (rolling)
+## 📋 Stato corrente
 
-**Ultima sessione**: YYYY-MM-DD
-
-**Cosa è stato fatto recentemente**:
-- ...
-
-**Prossimi passi pianificati**:
-- [ ] ...
-
-**Bloccanti**:
-- ...
+Non si tiene in questa pagina. Fase, versione, cosa è live, prossimi passi e bloccanti stanno nella
+pagina wiki `wiki/projects/<progetto>.md`, sezione "Stato corrente" (vedi `docs/fonte-unica.md`).
+Qui restano i fatti stabili e il review log.
 
 ---
 

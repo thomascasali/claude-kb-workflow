@@ -145,7 +145,13 @@ bash scripts/lib/secret-scan.sh .            # tutto il repo
 bash scripts/lib/secret-scan.sh --staged     # solo i file in staging
 ```
 
-Uscita: `0` pulito, `3` trovato qualcosa (righe `file:riga:REGOLA`), `2` errore d'uso. Lo scanner richiede bash 4 o superiore; è stato provato solo con Git Bash su Windows.
+Uscita: `0` pulito, `3` trovato qualcosa (righe `file:riga:REGOLA`), `2` errore d'uso. Lo scanner richiede bash 4 o superiore; è stato provato con Git Bash su Windows e con bash 5 su Ubuntu (WSL), non su macOS.
+
+Cosa legge: i file con byte NUL e quelli in UTF-16 con BOM vengono decodificati prima della scansione (serve `iconv`; se manca, lo scanner si ferma con exit `2` invece di dare un falso pulito). I file binari noti per estensione (immagini, archivi, ecc.) sono saltati. Nomi di file con `:` o con `-` iniziale sono gestiti.
+
+Il file `.gitattributes` forza le fine riga LF su script, hook e file di regole (`*.sh`, `.githooks/*`, `scripts/lib/*.txt`, `.secret-allowlist*`), così un clone con `core.autocrlf=true` non rompe lo scanner. Non toglierlo.
+
+`scripts/backup.sh` copia file da `~/.claude` dentro il repo: prima di committare esegui `bash scripts/lib/secret-scan.sh --repo . .` e aggiungi a mano i file che vuoi (`git add <file>`), non tutto in blocco.
 
 Se la segnalazione è un falso positivo (per esempio una password d'esempio in una guida), verifica prima che la riga non contenga un valore vero. Poi aggiungi una voce a `.secret-allowlist` nella radice del repo, nel formato `path:REGOLA:sha256(riga)`. Il modello è in `.secret-allowlist.example`, con il comando per calcolare l'hash. Una voce vale solo per quella riga: se la modifichi, torna a essere segnalata.
 

@@ -14,10 +14,12 @@ two new guides, and a round of text corrections.
   the relaunch when Sonnet fails.
 - `docs/orchestration.md`, `docs/orchestrazione.md`, `agents/README-AGENTI.md`, `workflows/common-tasks.md`
   and the README describe the three tiers and when to move up.
-- `ci-cd` and `mobile-dev`: the main release flow is GitHub Actions triggered by a tag, on a self-hosted
-  macOS runner. Codemagic stays as an alternative only. The example workflow no longer installs Flutter
-  with `subosito/flutter-action` on the runner, uses a non-bare Android build number and a completed
-  closed-test release.
+- `ci-cd` and `mobile-dev`: the release flow is GitHub Actions triggered by a tag. Android runs on a hosted
+  `ubuntu-latest` runner with `subosito/flutter-action`; only iOS needs macOS, with `macos-latest` as the
+  default and a self-hosted runner as an alternative (never on public repos). The example workflow uses a
+  non-bare Android build number, a completed closed-test release (`status: draft` for apps still in draft,
+  plus `releaseName`), secrets passed through `env:`, a temporary keychain with a signing lock and an
+  `if: always()` cleanup. The workflow was not run as part of this change. Codemagic stays as an alternative.
 - `integrations`: Telegram and Gemini examples are generic; the project-specific example was removed.
 
 ### Promotion rule
@@ -47,6 +49,14 @@ two new guides, and a round of text corrections.
 ### Scripts
 - Secret scanner `scripts/lib/secret-scan.sh`, with an example pre-commit hook.
 - Restore test `scripts/restore-test.sh` and restore script `scripts/restore.sh`.
+- The scanner reads files with NUL bytes and UTF-16 (decoded with `iconv`; without it the scan stops with exit 2),
+  handles file names with `:` or a leading `-`, tolerates CR line endings and a missing final newline in the
+  scope and allowlist files, and `wiki/projects/**` and `raw/**` now get the prose password rule.
+- New `.gitattributes` forces LF on `*.sh`, `.githooks/*`, `scripts/lib/*.txt` and `.secret-allowlist*`, so a clone
+  with `core.autocrlf=true` keeps working.
+- `scripts/backup.sh` stops with a clear message when the target is not a git repository, no longer suggests
+  `git add -A`, and points to the secret scanner before the commit.
+- CONTRIBUTING has a section on the secret scanner and the pre-commit hook.
 
 ## [0.3.2] - 2026-08-26
 

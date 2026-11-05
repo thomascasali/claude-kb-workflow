@@ -26,7 +26,7 @@ Gli agenti coprono i seguenti stack — ognuno è documentato con sezioni dedica
 | **Database** | MySQL 8, PostgreSQL 16, MongoDB 7, Firestore |
 | **Realtime** | Socket.io, WebSocket, Pusher, MQTT, WebRTC |
 | **Infra** | Docker + Docker Compose, Traefik 3, Nginx, Linux VPS |
-| **CI/CD** | GitHub Actions (runner macOS self-hosted per Flutter), Codemagic come alternativa |
+| **CI/CD** | GitHub Actions (Android su runner ospitato, iOS su macOS ospitato o self-hosted), Codemagic come alternativa |
 | **Integrazioni** | Stripe, SumUp, Email (SMTP/SES), Push (FCM/APNs), Telegram Bot, Gemini AI |
 
 ---
@@ -52,7 +52,7 @@ Gli agenti coprono i seguenti stack — ognuno è documentato con sezioni dedica
 | **database** | sonnet | Schema, Migration, Query, Backup (MySQL/MongoDB/PostgreSQL/Firestore) |
 | **integrations** | sonnet | Stripe, Email, Google APIs, Push notifications |
 | **realtime-dev** | sonnet | Socket.io, WebSocket, MQTT, WebRTC |
-| **ci-cd** | sonnet | GitHub Actions (tag-triggered, runner macOS self-hosted), firma, store deploy |
+| **ci-cd** | sonnet | GitHub Actions (tag-triggered, Android su runner ospitato, iOS su macOS), firma, store deploy |
 | **reviewer** | opus | Debug, Bug fix, Code review, Performance — **il gate di qualità** |
 | **security** | opus | JWT, Auth flows, CORS, Middleware, Data protection |
 
@@ -141,7 +141,7 @@ NON SO?
 |   |-- database.md             # MySQL/MongoDB/PostgreSQL/Firestore
 |   |-- integrations.md         # Stripe/Email/APIs
 |   |-- realtime-dev.md         # Socket.io/WebSocket/MQTT/WebRTC
-|   |-- ci-cd.md                # GitHub Actions (runner macOS self-hosted)/store deploy
+|   |-- ci-cd.md                # GitHub Actions (runner ospitati o macOS)/store deploy
 |   |-- reviewer.md             # Debug/Code Review (gate)
 |   |-- security.md             # JWT/Auth/CORS
 |-- patterns/

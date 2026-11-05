@@ -1,0 +1,7 @@
+# Fine riga LF anche su clone con core.autocrlf=true. Lo scanner anti-secret
+# e l'hook leggono questi file con regole e confronti che un CR finale
+# romperebbe (shebang, scope, allowlist, regole).
+*.sh              text eol=lf
+.githooks/*       text eol=lf
+scripts/lib/*.txt text eol=lf
+.secret-allowlist*  text eol=lf

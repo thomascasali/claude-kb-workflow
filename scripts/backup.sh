@@ -25,6 +25,15 @@ if [ ! -d "$CLAUDE_HOME" ]; then
     exit 1
 fi
 
+# Il backup copia file dentro il repo: senza git non si vedrebbe cosa è cambiato
+# e nessun controllo (scanner, hook) potrebbe girare. Meglio fermarsi prima di copiare.
+if ! git -C "$REPO_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo -e "${RED}Errore: $REPO_DIR non è un repository git.${NC}" >&2
+    echo "Il backup deve scrivere dentro un clone di claude-kb-workflow (cartella con .git)." >&2
+    echo "Nessun file è stato copiato." >&2
+    exit 1
+fi
+
 # 1. Agenti
 echo -e "${YELLOW}[1/5] Copiando agenti...${NC}"
 mkdir -p "$REPO_DIR/agents"
@@ -82,7 +91,7 @@ echo -e "${GREEN}=== Backup completato! ===${NC}"
 echo ""
 
 cd "$REPO_DIR"
-if git diff --stat --quiet 2>/dev/null && git diff --cached --stat --quiet 2>/dev/null; then
+if git diff --stat --quiet && git diff --cached --stat --quiet; then
     UNTRACKED=$(git ls-files --others --exclude-standard | wc -l)
     if [ "$UNTRACKED" -eq 0 ]; then
         echo "Nessuna modifica rilevata."
@@ -96,5 +105,7 @@ else
 fi
 
 echo ""
-echo "Per committare:"
-echo "  cd $REPO_DIR && git add -A && git commit -m 'backup: \$(date +%Y-%m-%d)'"
+echo "Prima di committare, controlla che non ci siano segreti:"
+echo "  cd $REPO_DIR && bash scripts/lib/secret-scan.sh --repo . ."
+echo "Poi scegli tu i file da aggiungere (git add <file>), senza aggiungere tutto in blocco."
+echo "L'hook pre-commit ripete il controllo sui file in staging (git config core.hooksPath .githooks)."

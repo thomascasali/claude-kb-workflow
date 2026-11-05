@@ -45,6 +45,11 @@
 # caricato. Il path è relativo alla radice del repo git del file; per un file
 # fuori da qualsiasi repo e senza --rel-root è il path come passato.
 #
+# Lettura dei file: grep in modalità testo (-a). I file con byte NUL e quelli
+# UTF-16 con BOM sono scansionati su una copia normalizzata (iconv; senza
+# iconv e con un file UTF-16: exit 2). I path possono contenere ":" o iniziare
+# per "-". Scope e allowlist tollerano CR finali e l'assenza del newline finale.
+#
 # Se `gitleaks` è nel PATH viene eseguito come livello aggiuntivo sugli
 # argomenti che sono directory (best-effort: un suo fallimento dà un WARN).
 #
@@ -143,6 +148,8 @@ expand_targets() {
     local existing=() t
     for t in "${TARGETS[@]}"; do
         if [[ -e "$t" ]]; then
+            # Un nome che inizia per "-" verrebbe letto da find come opzione.
+            [[ "$t" == -* ]] && t="./$t"
             existing+=("$t")
         else
             log_warn "non trovato, saltato: $t"
@@ -154,7 +161,7 @@ expand_targets() {
         log_warn "saltato (>10MB): $big"
     done
     find "${existing[@]}" -type f -not -path '*/.git/*' -not -size +10M -print0 2>/dev/null | while IFS= read -r -d '' f; do
-        is_binary_skip_cheap "$f" || printf '%s\n' "$f"
+        is_binary_skip_cheap "$f" || printf '%s\0' "$f"
     done
 }
 
@@ -202,7 +209,7 @@ rel_path_for() {
         if [[ -v _ABSDIR_CACHE["$filedir"] ]]; then
             absdir="${_ABSDIR_CACHE[$filedir]}"
         else
-            absdir="$(cd "$filedir" 2>/dev/null && pwd)"
+            absdir="$(cd -- "$filedir" 2>/dev/null && pwd)"
             _ABSDIR_CACHE["$filedir"]="$absdir"
         fi
         abs="$absdir/$filebase"
@@ -362,7 +369,8 @@ is_allowlisted() {
 declare -a SCOPE_GLOBS=() SCOPE_RULES=() SCOPE_ACTIONS=()
 declare -A RESTRICTED_RULES=()   # regola -> 1 se ha almeno una riga INCLUDE_ONLY
 if [[ -f "$SCOPE_FILE" ]]; then
-    while IFS=$'\t' read -r sc_glob sc_action sc_rule; do
+    while IFS=$'\t' read -r sc_glob sc_action sc_rule || [[ -n "$sc_glob" ]]; do
+        sc_rule="${sc_rule%$'\r'}"; sc_action="${sc_action%$'\r'}"; sc_glob="${sc_glob%$'\r'}"
         [[ -z "$sc_glob" || "$sc_glob" == \#* ]] && continue
         case "$sc_action" in
             EXCLUDE|INCLUDE_ONLY) ;;
@@ -396,6 +404,7 @@ is_rule_excluded_for_path() {
 # --- regole (TAB-separated: NOME<TAB>REGEX<TAB>FLAG) -------------------------
 declare -a RULE_NAMES=() RULE_REGEX=() RULE_FLAGS=()
 _RULES_RAW="$(grep -vE '^[[:space:]]*(#|$)' "$PATTERNS_FILE")"
+_RULES_RAW="${_RULES_RAW//$'\r'/}"   # file regole salvato con CRLF
 while IFS=$'\t' read -r name regex flags; do
     [[ -z "$name" || "$name" == \#* ]] && continue
     RULE_NAMES+=("$name")
@@ -411,6 +420,11 @@ fi
 FINDINGS=()   # "path:riga:regola"
 STAGED_TMPDIR=""
 REPO_TOP=""
+
+# Cartella di lavoro unica (copie in staging, copie normalizzate, elenchi),
+# rimossa all'uscita.
+WORK_TMP="$(mktemp -d)" || { log_fail "impossibile creare una cartella temporanea"; exit 2; }
+trap 'rm -rf "$WORK_TMP"' EXIT
 
 # REALPATHS[i] / REPORTPATHS[i]: file fisico da leggere / path da stampare e
 # da usare come chiave dell'allowlist. Riempiti prima, così lo scan gira UNA
@@ -431,9 +445,9 @@ if [[ "$STAGED" -eq 1 ]]; then
         log_fail "--staged richiede di essere in un repo git"
         exit 2
     fi
-    STAGED_TMPDIR="$(mktemp -d)"
-    STAGED_LIST_FILE="$(mktemp)"
-    trap '[[ -n "$STAGED_TMPDIR" ]] && rm -rf "$STAGED_TMPDIR"; [[ -n "${STAGED_LIST_FILE:-}" ]] && rm -f "$STAGED_LIST_FILE"' EXIT
+    STAGED_TMPDIR="$WORK_TMP/staged"
+    STAGED_LIST_FILE="$WORK_TMP/staged.list"
+    mkdir -p "$STAGED_TMPDIR"
     # -z + core.quotepath=off: senza, git quota i path non-ASCII con escape
     # ottali che non combaciano con nessun file reale, e il file sparirebbe
     # dallo scan in silenzio.
@@ -444,8 +458,9 @@ if [[ "$STAGED" -eq 1 ]]; then
     fi
     while IFS= read -r -d '' path; do
         [[ -z "$path" ]] && continue
-        mkdir -p "$STAGED_TMPDIR/$(dirname "$path")"
-        if ! git -C "$REPO_TOP" show ":$path" > "$STAGED_TMPDIR/$path" 2>/dev/null; then
+        mkdir -p -- "$STAGED_TMPDIR/$(dirname -- "$path")"
+        # ":0:" esplicito: ":1:x" come nome file verrebbe letto come stage 1.
+        if ! git -C "$REPO_TOP" show ":0:$path" > "$STAGED_TMPDIR/$path" 2>/dev/null; then
             # Mai uno skip silenzioso: un path in staging che non si riesce a
             # leggere è un errore d'ambiente, non "nessun secret" (il
             # chiamante tipico è un hook pre-commit fail-closed).
@@ -460,12 +475,61 @@ else
         log_fail "nessun file/directory da scandire (e --staged non passato)"
         exit 2
     fi
-    _EXPANDED="$(expand_targets)"
-    while IFS= read -r f; do
+    # Elenco NUL-separato su file (un nome può contenere newline).
+    expand_targets > "$WORK_TMP/expanded.list"
+    while IFS= read -r -d '' f; do
         [[ -z "$f" ]] && continue
         rel_path_for "$f"   # NON $(...): vedi il commento sulla funzione
         add_target "$f" "$_RELPATH_RESULT"
-    done <<< "$_EXPANDED"
+    done < "$WORK_TMP/expanded.list"
+fi
+
+# --- file con byte NUL (binari, UTF-16) --------------------------------------
+# grep tratta un file con NUL come binario e risponde "Binary file matches"
+# senza stampare le righe: lo scanner non vedrebbe nulla e darebbe exit 0.
+# Questi file (riconosciuti con una sola chiamata grep, locale C) vengono
+# scansionati su una copia normalizzata:
+#   - BOM UTF-16 (FF FE / FE FF): decodificata in UTF-8 con iconv. Se iconv
+#     manca si esce con 2 (fail-closed): meglio bloccare che dare un falso
+#     "pulito" su un file che non si sa leggere.
+#   - altrimenti (NUL sparsi, UTF-16 senza BOM): copia senza i byte NUL, che
+#     ricompone il testo ASCII; i numeri di riga restano quelli del file.
+# Le estensioni binarie note restano saltate prima (is_binary_skip_cheap).
+if [[ "${#REALPATHS[@]}" -gt 0 ]]; then
+    declare -A _NUL_FILES=()
+    LC_ALL=C grep -ILZ -e '' -- "${REALPATHS[@]}" > "$WORK_TMP/nul.list" 2>/dev/null
+    while IFS= read -r -d '' f; do
+        [[ -s "$f" ]] && _NUL_FILES["$f"]=1
+    done < "$WORK_TMP/nul.list"
+    if [[ "${#_NUL_FILES[@]}" -gt 0 ]]; then
+        mkdir -p "$WORK_TMP/norm"
+        _old_real=("${REALPATHS[@]}"); _old_rep=("${REPORTPATHS[@]}")
+        REALPATHS=(); REPORTPATHS=(); _REPORTPATH_OF=()
+        _n=0
+        for i in "${!_old_real[@]}"; do
+            f="${_old_real[$i]}"
+            if [[ -z "${_NUL_FILES[$f]:-}" ]]; then
+                add_target "$f" "${_old_rep[$i]}"
+                continue
+            fi
+            _n=$((_n+1))
+            nf="$WORK_TMP/norm/$_n"
+            bom="$(LC_ALL=C od -An -tx1 -N2 < "$f" | tr -d ' \n')"
+            if [[ "$bom" == "fffe" || "$bom" == "feff" ]]; then
+                if ! command -v iconv >/dev/null 2>&1; then
+                    log_fail "file UTF-16 da decodificare ma iconv non è installato: ${_old_rep[$i]}"
+                    exit 2
+                fi
+                if ! iconv -c -f UTF-16 -t UTF-8 < "$f" > "$nf" 2>/dev/null; then
+                    log_warn "iconv fallito su ${_old_rep[$i]}: scansione senza decodifica"
+                    LC_ALL=C tr -d '\000' < "$f" > "$nf"
+                fi
+            else
+                LC_ALL=C tr -d '\000' < "$f" > "$nf"
+            fi
+            add_target "$nf" "${_old_rep[$i]}"
+        done
+    fi
 fi
 
 # --- allowlist (uno o più file) in una mappa "path:regola" -> set di hash ----
@@ -497,40 +561,21 @@ declare -A _ALLOW=()
 _ALLOWLIST_NONEMPTY=0
 for ALLOWLIST_FILE in "${_ALLOWLIST_FILES[@]:-}"; do
     [[ -z "$ALLOWLIST_FILE" || ! -f "$ALLOWLIST_FILE" ]] && continue
-    while IFS= read -r line; do
+    # "|| [[ -n $line ]]": l'ultima voce vale anche senza newline finale.
+    # "\r" finale tolto (allowlist salvata con CRLF). Il parsing parte da
+    # destra: hash e regola non contengono ":", il path sì (nome con ":").
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        line="${line%$'\r'}"
         [[ -z "$line" || "$line" == \#* ]] && continue
-        local_path="${line%%:*}"
-        rest="${line#*:}"
-        rule="${rest%%:*}"
-        hash="${rest#*:}"
+        hash="${line##*:}"
+        rest="${line%:*}"
+        rule="${rest##*:}"
+        local_path="${rest%:*}"
         key="${local_path}:${rule}"
         _ALLOW["$key"]="${_ALLOW[$key]:-} $hash"
         _ALLOWLIST_NONEMPTY=1
     done < "$ALLOWLIST_FILE"
 done
-
-# Spezza "FILE:RIGA:CONTENUTO" (formato di `grep -nH`) in _M_FILE / _M_LINENO /
-# _M_CONTENT (globali, mai $(...)). Non cerca FILE nei REALPATHS (sarebbe
-# quadratico): individua dove finisce guardando la forma del path. Con una
-# lettera di unità ("X:/...") FILE contiene un ":" in più, quindi il
-# separatore di grep è il secondo ":"; altrimenti è il primo.
-_M_FILE=""; _M_LINENO=""; _M_CONTENT=""
-parse_matchline() {
-    local line="$1" rest after_drive
-    case "$line" in
-        [A-Za-z]:/*)
-            after_drive="${line#*:}"
-            after_drive="${after_drive%%:*}"
-            _M_FILE="${line%%:*}:${after_drive}"
-            ;;
-        *)
-            _M_FILE="${line%%:*}"
-            ;;
-    esac
-    rest="${line#"${_M_FILE}:"}"
-    _M_LINENO="${rest%%:*}"
-    _M_CONTENT="${rest#"${_M_LINENO}:"}"
-}
 
 # Vero se <nome> è UNO dei flag separati da virgola (confronto esatto:
 # "FMTPLACEHOLDER" contiene "PLACEHOLDER" come sottostringa).
@@ -547,17 +592,19 @@ _flag_has() {
 if [[ "${#REALPATHS[@]}" -gt 0 ]]; then
     for i in "${!RULE_NAMES[@]}"; do
         name="${RULE_NAMES[$i]}"; regex="${RULE_REGEX[$i]}"; flags="${RULE_FLAGS[$i]}"
-        grep_opts=(-nHE)   # -H: prefisso "file:" anche con un solo file
-        _flag_has "$flags" CI && grep_opts=(-nHEi)
-        matches="$(grep "${grep_opts[@]}" -- "$regex" "${REALPATHS[@]}" 2>/dev/null)"
-        [[ -z "$matches" ]] && continue
-        while IFS= read -r matchline; do
-            [[ -z "$matchline" ]] && continue
-            parse_matchline "$matchline"
-            lineno="$_M_LINENO"
-            content="$_M_CONTENT"
+        # -a: modalità testo (mai "Binary file matches", per byte non UTF-8).
+        # --null: dopo il nome file un NUL al posto di ":", così un nome con
+        # ":" o con newline non confonde il parsing. "--": nomi con "-".
+        grep_opts=(-nHEa --null)
+        _flag_has "$flags" CI && grep_opts=(-nHEai --null)
+        grep "${grep_opts[@]}" -e "$regex" -- "${REALPATHS[@]}" \
+            > "$WORK_TMP/matches" 2>/dev/null
+        [[ -s "$WORK_TMP/matches" ]] || continue
+        while IFS= read -r -d '' mfile && IFS= read -r mrest; do
+            lineno="${mrest%%:*}"
+            content="${mrest#*:}"
             [[ -z "$lineno" ]] && continue
-            reportpath="${_REPORTPATH_OF[$_M_FILE]:-}"
+            reportpath="${_REPORTPATH_OF[$mfile]:-}"
             [[ -z "$reportpath" ]] && continue
             if [[ "${#SCOPE_GLOBS[@]}" -gt 0 ]] && is_rule_excluded_for_path "$reportpath" "$name"; then
                 continue
@@ -572,9 +619,14 @@ if [[ "${#REALPATHS[@]}" -gt 0 ]]; then
             if [[ "$_ALLOWLIST_NONEMPTY" -eq 1 ]]; then
                 hash="$(sha256_string "$content")"
                 is_allowlisted "$reportpath" "$name" "$hash" && continue
+                # Stessa riga con CR finale (file CRLF): vale la stessa voce.
+                if [[ "$content" == *$'\r' ]]; then
+                    hash="$(sha256_string "${content%$'\r'}")"
+                    is_allowlisted "$reportpath" "$name" "$hash" && continue
+                fi
             fi
             FINDINGS+=("${reportpath}:${lineno}:${name}")
-        done <<< "$matches"
+        done < "$WORK_TMP/matches"
     done
 fi
 
