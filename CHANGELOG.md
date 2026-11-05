@@ -9,9 +9,10 @@ Fix for a false clean in the secret scanner.
   even a plain text file, so a secret in it was not found. A file without NUL bytes, up to 10 MB, is now always
   scanned, whatever its extension. The extension list only applies to a file that really contains NUL bytes and has no
   UTF-16/UTF-32 BOM; a certain binary signature on a file with NUL still skips it, with a warning.
-- Known limit: a file with NUL bytes, no BOM and an extension in the list is skipped even if it holds a secret.
+- Known limit: a file with NUL bytes, no BOM and an extension in the list is skipped without a warning, even if it holds a secret.
 - Tests: the extension case is inverted (a text file with a listed extension and a fake key is now reported), the NUL
   cases are added (skipped), plus a UTF-16 file with BOM and a listed extension (scanned).
+- Tests passed on Git Bash for Windows and on Ubuntu 22.04 in WSL, not on macOS.
 
 ## [0.4.0] - 2026-11-05
 
