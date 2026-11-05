@@ -159,6 +159,7 @@ Cosa legge:
 - nomi di file con `:`, con `-` iniziale o con caratteri come `$(...)` sono trattati come semplici nomi.
 
 Limite noto: la regola in prosa non scatta se la radice stessa del repo si chiama `wiki/` o `raw/`, né con `--rel-root` senza prefisso, perché i glob di perimetro vedono allora un path relativo senza quella cartella.
+Altro limite noto: una voce di allowlist sulla prima riga di un file con BOM può non combaciare sulla copia grezza, perché la riga contiene i byte del BOM. Il file viene quindi segnalato anche con la voce presente: è un falso positivo, mai un falso pulito. Le righe successive alla prima restano allowlistabili.
 
 Il file `.gitattributes` forza le fine riga LF su script, hook e file di regole (`*.sh`, `.githooks/*`, `scripts/lib/*.txt`, `.secret-allowlist*`), così un clone con `core.autocrlf=true` non rompe lo scanner. Non toglierlo.
 

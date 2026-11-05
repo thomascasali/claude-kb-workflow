@@ -58,6 +58,8 @@ two new guides, and a round of text corrections.
   It treats file and folder names as plain data (`:`, a leading `-`, `$(...)`), follows a symlink given as an argument,
   and tolerates CR line endings and a missing final newline in the scope and allowlist files.
   `wiki/projects/**` and `raw/**` get the prose password rule, also in scans outside a git repository.
+  Known limit: an allowlist entry for the first line of a file with a BOM may not match the raw copy, so the file is still
+  reported. This gives a false positive, never a false clean; later lines can still be allowlisted.
 - Scanner arguments go to `grep` in batches, so a large tree no longer fails with "Argument list too long".
   A failing `find` or `grep`, a path that does not exist (even one among others) or a copy that cannot be written gives
   exit 2 and never a clean result. An existing argument that yields no file read gives a warning.
