@@ -113,7 +113,7 @@ Niente qui dentro pretende di essere LA verità. Sono pattern che hanno funziona
 
 ## Stato e maturità
 
-Il toolkit è alla **versione 0.4** (vedi il [CHANGELOG](../CHANGELOG.md)) ed è pubblico dalla 0.3.1. Significa:
+Il toolkit è alla **versione 0.4.1** (vedi il [CHANGELOG](../CHANGELOG.md)) ed è pubblico dalla 0.3.1. Significa:
 
 - I pattern vengono da lavoro reale, ma in pochi contesti (mio)
 - Le skill metodologiche sono adattate da Superpowers (collaudato in inglese) ma ancora non massivamente provate in italiano

@@ -50,9 +50,12 @@
 # Lettura dei file: grep in modalità testo (-a), a lotti di argomenti (una riga
 # di comando unica supererebbe il limite del sistema con molti file). I file con
 # un byte NUL in qualunque punto sono scansionati su copie: vedi la
-# sezione "file con byte NUL". Saltati: estensioni binarie note (senza distinzione
-# di maiuscole) e firme binarie certe in testa al file. I path possono contenere
-# ":" o iniziare per "-". Scope e allowlist tollerano CR finali e l'assenza del
+# sezione "file con byte NUL". Un file senza NUL fino a 10 MB si scansiona sempre,
+# qualunque estensione abbia (oltre, avviso). Con NUL si salta: estensione binaria
+# nota (senza distinzione di maiuscole) senza BOM UTF-16/UTF-32 (senza avviso),
+# oppure firma binaria certa in testa al file (con avviso). Limite noto: un file
+# con NUL, senza BOM e con estensione in lista si salta anche se contiene un
+# secret. I path possono contenere ":" o iniziare per "-". Scope e allowlist tollerano CR finali e l'assenza del
 # newline finale.
 #
 # Se `gitleaks` è nel PATH viene eseguito come livello aggiuntivo sugli
@@ -109,8 +112,9 @@ if [[ ! -f "$PATTERNS_FILE" ]]; then
     exit 2
 fi
 
-# Estensioni di binari da saltare senza aprirli. Confronto in minuscolo su una
-# mappa: costo costante per file, anche su decine di migliaia di file.
+# Estensioni di binari: da sole non saltano mai un file, valgono solo per un file
+# che contiene davvero NUL (vedi normalize_nul_files). Un testo chiamato x.doc o
+# x.PNG si scansiona. Confronto in minuscolo su una mappa: costo costante per file.
 declare -A _BINARY_EXT=()
 for _ext in \
     png jpg jpeg gif webp ico bmp tif tiff heic avif psd \
@@ -130,10 +134,16 @@ _MAX_BYTES=10485760   # 10MB: oltre, si salta con un WARN.
 _META_BASENAMES=('.secret-allowlist' '.secret-allowlist.example' 'secret-patterns.txt' 'secret-scope.txt')
 
 is_binary_skip_cheap() {
-    local base="${1##*/}" m ext
+    local base="${1##*/}" m
     for m in "${_META_BASENAMES[@]}"; do
         [[ "$base" == "$m" ]] && return 0
     done
+    return 1
+}
+
+# Solo estensione (nessun subprocess: chiamata una volta per file con NUL).
+has_binary_ext() {
+    local base="${1##*/}" ext
     [[ "$base" == *.* ]] || return 1
     ext="${base##*.}"
     [[ -n "${_BINARY_EXT[${ext,,}]+x}" ]]
@@ -597,6 +607,8 @@ fi
 # --- file con byte NUL (binari, UTF-16) --------------------------------------
 # Senza -a grep tratta un file con NUL come binario; con -a un NUL nella riga
 # stampata romperebbe il parsing. Questi file si scansionano quindi su copie:
+#   - estensione binaria nota senza BOM UTF-16/UTF-32: saltato. Il NUL è la prova
+#     che il file è binario: senza NUL l'estensione non conta.
 #   - firma binaria certa (is_binary_signature): saltato, con un avviso.
 #   - sempre due copie grezze, con gli stessi numeri di riga: NUL tolti (ricompone
 #     il testo ASCII in UTF-16/UTF-32) e NUL sostituiti da spazi (tiene il confine
@@ -669,6 +681,7 @@ normalize_nul_files() {
             fffe0000|0000feff) enc="UTF-32" ;;
             fffe*|feff*)       enc="UTF-16" ;;
         esac
+        [[ -z "$enc" ]] && has_binary_ext "$f" && continue
         if [[ -z "$enc" ]] && is_binary_signature "$_SIG"; then
             log_warn "saltato (firma binaria): $rep"
             continue

@@ -355,10 +355,10 @@ fi
 ERR="$(bash "$SCAN" "$SD/vuota" 2>&1 >/dev/null)"
 check "cartella vuota come argomento -> exit 0" 0 $?
 if [[ "$ERR" == *"nessun file letto"* ]]; then ok "cartella vuota: avviso su stderr"; else bad "cartella vuota: nessun avviso"; fi
-printf 'x\n' > "$SD/foto.png"
-ERR="$(bash "$SCAN" "$SD/vera" "$SD/foto.png" 2>&1 >/dev/null)"
+printf 'x\n' > "$SD/secret-scope.txt"
+ERR="$(bash "$SCAN" "$SD/vera" "$SD/secret-scope.txt" 2>&1 >/dev/null)"
 check "argomento con soli file saltati, altro con secret -> exit 3" 3 $?
-if [[ "$ERR" == *"nessun file letto"*foto.png* ]]; then ok "file saltato come argomento: avviso su stderr"; else bad "file saltato come argomento: nessun avviso"; fi
+if [[ "$ERR" == *"nessun file letto"*secret-scope.txt* ]]; then ok "file saltato come argomento: avviso su stderr"; else bad "file saltato come argomento: nessun avviso"; fi
 rm -rf "$SD"
 
 echo "=== scanner: confronto a byte con locale UTF-8 ==="
@@ -387,12 +387,26 @@ BEGIN_PEM='-----BEG''IN PRIVATE KEY-----'
 { printf 'MZ\220\000\003\000'; printf '%s\n' "$BEGIN_PEM"; } > "$R/lib.bin"
 bash "$SCAN" "$R/lib.bin" >/dev/null 2>&1
 check "DLL rinominata .bin -> exit 0" 0 $?
-for n in x.JPG x.Jar x.wasm x.DOCX x.DLL; do
+# L'estensione da sola non salta mai un file: un testo chiamato x.doc si scansiona.
+for n in x.JPG x.Jar x.wasm x.DOCX x.DLL x.doc x.pdf; do
     printf 'k = "%s"\n' "$VN" > "$R/$n"
     bash "$SCAN" "$R/$n" >/dev/null 2>&1
-    check "estensione binaria $n -> saltato" 0 $?
+    check "testo con estensione in lista $n -> trovato" 3 $?
     rm -f "$R/$n"
 done
+# Con NUL (e senza BOM) l'estensione in lista salta il file.
+for n in x.JPG x.Jar x.wasm x.DOCX x.DLL x.doc x.pdf; do
+    { printf 'k = "%s"\n' "$VN"; printf '\000\n'; } > "$R/$n"
+    bash "$SCAN" "$R/$n" >/dev/null 2>&1
+    check "estensione binaria $n con NUL -> saltato" 0 $?
+    rm -f "$R/$n"
+done
+if command -v iconv >/dev/null 2>&1; then
+    printf 'riga uno\nk = "%s"\n' "$VN" | iconv -f UTF-8 -t UTF-16 > "$R/u16.docx"
+    bash "$SCAN" "$R/u16.docx" >/dev/null 2>&1
+    check "UTF-16 con BOM e estensione in lista -> trovato" 3 $?
+    rm -f "$R/u16.docx"
+fi
 rm -f "$R/lib.bin"
 # Estensione ignota: decide la firma in testa al file.
 sig_case() {   # sig_case <etichetta> <firma per printf>

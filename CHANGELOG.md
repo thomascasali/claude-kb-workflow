@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.1] - 2026-11-05
+
+Fix for a false clean in the secret scanner.
+
+### Fixed
+- The scanner skipped any file whose extension was in the binary list (`.doc`, `.pdf`, `.png`, `.db` and similar),
+  even a plain text file, so a secret in it was not found. A file without NUL bytes, up to 10 MB, is now always
+  scanned, whatever its extension. The extension list only applies to a file that really contains NUL bytes and has no
+  UTF-16/UTF-32 BOM; a certain binary signature on a file with NUL still skips it, with a warning.
+- Known limit: a file with NUL bytes, no BOM and an extension in the list is skipped even if it holds a secret.
+- Tests: the extension case is inverted (a text file with a listed extension and a fake key is now reported), the NUL
+  cases are added (skipped), plus a UTF-16 file with BOM and a listed extension (scanned).
+
 ## [0.4.0] - 2026-11-05
 
 Three model tiers, a promotion rule that matches how the toolkit is actually run,
@@ -65,6 +78,7 @@ two new guides, and a round of text corrections.
   exit 2 and never a clean result. An existing argument that yields no file read gives a warning.
 - Skipped without reading: more binary extensions, case-insensitive (`.jar`, `.wasm`, `.docx` and similar), and, with a
   warning, files with NUL bytes that start with a certain binary signature. A secret inside those files is not found.
+  (Corrected in 0.4.1: the extension alone no longer skips a file, see above.)
 - `--staged` skips gitlinks (submodules) and also scans type changes. The `gitleaks` report stays in the scanner's work folder,
   which is now removed on HUP, INT and TERM too.
 - Tests passed on Git Bash for Windows and on Ubuntu 22.04 in WSL, not on macOS.
