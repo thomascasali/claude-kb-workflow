@@ -465,6 +465,7 @@ git push origin v1.2.0
 VPS_HOST=<VPS_IP>
 SSH_PRIVATE_KEY=<contenuto chiave SSH>
 SSH_PORT=<porta SSH, es. 22>
+PROJECT_DIR=<cartella del progetto sul VPS>
 
 # Flutter Android
 GOOGLE_PLAY_SERVICE_ACCOUNT=<JSON service account>
@@ -482,9 +483,6 @@ IOS_KEYCHAIN_PASSWORD=<password del keychain temporaneo>
 IOS_CERT_P12_BASE64=<certificato .p12 codificato base64>
 IOS_CERT_PASSWORD=<password del .p12>
 IOS_PROVISIONING_PROFILE_BASE64=<profilo codificato base64>
-
-# Firebase
-FIREBASE_SERVICE_ACCOUNT=<JSON>
 ```
 
 ### CRITICO: Mai committare secrets!

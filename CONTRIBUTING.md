@@ -145,16 +145,20 @@ bash scripts/lib/secret-scan.sh .            # tutto il repo
 bash scripts/lib/secret-scan.sh --staged     # solo i file in staging
 ```
 
-Uscita: `0` pulito, `3` trovato qualcosa (righe `file:riga:REGOLA`), `2` errore d'uso o di lettura: se `find` o `grep` falliscono, o nessun path esiste, non risulta mai pulito. Un path mancante tra altri esistenti dà solo un avviso.
+Uscita: `0` pulito, `3` trovato qualcosa (righe `file:riga:REGOLA`), `2` errore d'uso o di lettura: se `find` o `grep` falliscono, se un path indicato non esiste (anche uno solo tra altri esistenti) o se non si riesce a preparare una copia da leggere, non risulta mai pulito. Un argomento esistente da cui non si legge alcun file (cartella vuota, solo file saltati) dà exit `0` con un avviso su stderr.
 
 Dove è provato: il collaudo e lo scanner sono passati su Git Bash per Windows (bash 5.2, GNU grep 3.0) e su Ubuntu 22.04 in WSL (bash 5.1, GNU grep 3.7). Non sono mai stati eseguiti su macOS né con grep diversi da GNU grep. Lo script usa funzioni di bash 4, ma altre versioni non sono state provate.
 
 Cosa legge:
-- i file con un byte NUL in qualunque punto vengono letti su copie normalizzate. Con BOM UTF-16 o UTF-32 li decodifica `iconv`; se manca, lo scanner esce con `2`. Senza BOM ne legge due copie: una senza i NUL, per il testo UTF-16 o UTF-32 senza BOM, e una con i NUL sostituiti da spazi, per un valore preceduto da un NUL.
-- non legge i file oltre 10 MB (avviso su stderr) e quelli con estensione binaria nota (`.png`, `.zip`, `.bin`, `.jar`, `.wasm`, `.docx` e simili, maiuscole o minuscole). Non legge neppure quelli con NUL che iniziano con una firma binaria certa: eseguibili PE, ELF, Mach-O, zip, wasm, gzip, xz, 7z, png, jpeg, OLE2. Un segreto dentro uno di questi file non viene trovato.
+- i file con un byte NUL in qualunque punto vengono letti su due copie grezze: una senza i NUL, per il testo ASCII in UTF-16 o UTF-32, e una con i NUL sostituiti da spazi, per un valore preceduto da un NUL. Con BOM UTF-16 o UTF-32 si aggiunge la decodifica con `iconv`; se manca, lo scanner esce con `2`.
+- le regole confrontano a byte (`LC_ALL=C`), quindi anche un byte Latin-1 attaccato a una chiave fa da confine. Nella regola in prosa le lettere accentate sono scritte per esteso (`è`, `È`).
+- un symlink passato come argomento viene seguito; quelli dentro le cartelle no.
+- non legge i file oltre 10 MB (avviso su stderr) e quelli con queste estensioni, maiuscole o minuscole: `png jpg jpeg gif webp ico bmp tif tiff heic avif psd pdf doc docx xls xlsx ppt pptx odt ods odp zip gz tgz bz2 xz tar 7z rar jar war ear apk aab ipa deb rpm dmg iso msi exe dll so dylib o a lib obj pdb wasm class pyc woff woff2 ttf otf eot mp4 mp3 mov avi mkv webm wav flac ogg aac m4a sqlite sqlite3 db`. Non legge neppure, con un avviso, i file con NUL che iniziano con una firma binaria certa: eseguibili PE, ELF, Mach-O, zip, wasm, gzip, xz, 7z, png, jpeg, OLE2. `.bin` non è nell'elenco: un binario vero rinominato così è coperto dalla firma, un `.bin` di testo viene letto. Un segreto dentro i file saltati non viene trovato.
 - un binario di formato sconosciuto viene letto come testo: può dare un falso positivo, che si gestisce con l'allowlist. La scelta è per firma e non per quantità di NUL, perché un UTF-16 senza BOM ha tanti NUL quanti un binario.
 - in `--staged` i gitlink (submodule) sono saltati con un avviso: il loro contenuto va controllato nel repo del submodule.
 - nomi di file con `:`, con `-` iniziale o con caratteri come `$(...)` sono trattati come semplici nomi.
+
+Limite noto: la regola in prosa non scatta se la radice stessa del repo si chiama `wiki/` o `raw/`, né con `--rel-root` senza prefisso, perché i glob di perimetro vedono allora un path relativo senza quella cartella.
 
 Il file `.gitattributes` forza le fine riga LF su script, hook e file di regole (`*.sh`, `.githooks/*`, `scripts/lib/*.txt`, `.secret-allowlist*`), così un clone con `core.autocrlf=true` non rompe lo scanner. Non toglierlo.
 

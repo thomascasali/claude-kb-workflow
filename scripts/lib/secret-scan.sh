@@ -49,7 +49,7 @@
 #
 # Lettura dei file: grep in modalità testo (-a), a lotti di argomenti (una riga
 # di comando unica supererebbe il limite del sistema con molti file). I file con
-# un byte NUL in qualunque punto sono scansionati su copie normalizzate: vedi la
+# un byte NUL in qualunque punto sono scansionati su copie: vedi la
 # sezione "file con byte NUL". Saltati: estensioni binarie note (senza distinzione
 # di maiuscole) e firme binarie certe in testa al file. I path possono contenere
 # ":" o iniziare per "-". Scope e allowlist tollerano CR finali e l'assenza del
@@ -116,7 +116,7 @@ for _ext in \
     png jpg jpeg gif webp ico bmp tif tiff heic avif psd \
     pdf doc docx xls xlsx ppt pptx odt ods odp \
     zip gz tgz bz2 xz tar 7z rar jar war ear apk aab ipa deb rpm dmg iso msi \
-    exe dll so dylib bin o a lib obj pdb wasm class pyc \
+    exe dll so dylib o a lib obj pdb wasm class pyc \
     woff woff2 ttf otf eot \
     mp4 mp3 mov avi mkv webm wav flac ogg aac m4a \
     sqlite sqlite3 db; do
@@ -155,26 +155,25 @@ is_binary_skip() {
 # Espande i target in una lista piatta di file, saltando .git/ e i binari.
 # Un solo `find` per tutti i target, filtro dimensione nativo.
 expand_targets() {
-    local existing=() t
+    local existing=() unseen=() still=() t missing=0
     for t in "${TARGETS[@]}"; do
         if [[ -e "$t" ]]; then
             # Un nome che inizia per "-" verrebbe letto da find come opzione.
             [[ "$t" == -* ]] && t="./$t"
             existing+=("$t")
         else
-            log_warn "non trovato, saltato: $t"
+            log_fail "path non trovato: $t"
+            missing=1
         fi
     done
-    if [[ "${#existing[@]}" -eq 0 ]]; then
-        log_fail "nessuno dei path indicati esiste"
-        exit 2
-    fi
+    [[ "$missing" -eq 1 ]] && exit 2
 
     # Su file, non in pipe: l'exit code di find non va perso (una cartella
-    # illeggibile non è "nessun secret").
-    if ! find "${existing[@]}" -type f -not -path '*/.git/*' -size +10M -print0 \
+    # illeggibile non è "nessun secret"). -H: un symlink passato come argomento si
+    # segue, quelli trovati dentro le cartelle no.
+    if ! find -H "${existing[@]}" -type f -not -path '*/.git/*' -size +10M -print0 \
             > "$WORK_TMP/big.list" 2> "$WORK_TMP/find.err" \
-        || ! find "${existing[@]}" -type f -not -path '*/.git/*' -not -size +10M -print0 \
+        || ! find -H "${existing[@]}" -type f -not -path '*/.git/*' -not -size +10M -print0 \
             > "$WORK_TMP/found.list" 2> "$WORK_TMP/find.err"; then
         log_fail "find fallito, scansione incompleta: $(head -n 3 "$WORK_TMP/find.err")"
         exit 2
@@ -182,9 +181,22 @@ expand_targets() {
     while IFS= read -r -d '' big; do
         log_warn "saltato (>10MB): $big"
     done < "$WORK_TMP/big.list"
+    unseen=("${existing[@]}")
     while IFS= read -r -d '' f; do
-        is_binary_skip_cheap "$f" || printf '%s\0' "$f"
+        is_binary_skip_cheap "$f" && continue
+        printf '%s\0' "$f"
+        if [[ "${#unseen[@]}" -gt 0 ]]; then
+            still=()
+            for t in "${unseen[@]}"; do
+                [[ "$f" == "$t" || "$f" == "${t%/}"/* ]] || still+=("$t")
+            done
+            unseen=(${still[@]+"${still[@]}"})
+        fi
     done < "$WORK_TMP/found.list"
+    # Exit invariato, ma un argomento da cui non si è letto nulla non passa in silenzio.
+    for t in ${unseen[@]+"${unseen[@]}"}; do
+        log_warn "nessun file letto da questo argomento: $t"
+    done
 }
 
 # Path relativo alla radice del repo che contiene $1. Il risultato va in
@@ -351,7 +363,7 @@ _SECASSIGN_RE_JSON="\"([a-z0-9]+_)*(password|passwd|secret|token|api_?key|privat
 _SECASSIGN_RE_YAML="^[[:space:]]*([a-z0-9]+_)*(password|passwd|secret|token|api_?key|private_key)(_[a-z0-9]+)*:[[:space:]]+[\"']?([^[:space:]\"']+)"
 # Forma della regola SECRET_ASSIGNMENT_PROSE (case-insensitive), provata solo
 # come ultimo fallback.
-_SECASSIGN_RE_PROSE="(password|passwd|pwd|secret|token|api[ _-]?key|client[ _-]?secret|private[ _-]?key)[A-Za-z0-9 '-]{0,20}(:|=|[[:space:]]è[[:space:]]|[[:space:]]e'[[:space:]]|[[:space:]]is[[:space:]])[[:space:]]*[\"'\`]?([^[:space:]\"'\`]+)"
+_SECASSIGN_RE_PROSE="(password|passwd|pwd|secret|token|api[ _-]?key|client[ _-]?secret|private[ _-]?key)[A-Za-z0-9 '-]{0,20}(:|=|[[:space:]](è|È)[[:space:]]|[[:space:]]e'[[:space:]]|[[:space:]]is[[:space:]])[[:space:]]*[\"'\`]?([^[:space:]\"'\`]+)"
 
 _EXTRACT_RESULT=""
 extract_assignment_value() {
@@ -369,7 +381,7 @@ extract_assignment_value() {
         shopt -q nocasematch && _nocase_was_on=1
         shopt -s nocasematch
         if [[ "$line" =~ $_SECASSIGN_RE_PROSE ]]; then
-            v="${BASH_REMATCH[3]}"
+            v="${BASH_REMATCH[4]}"
         fi
         [[ "$_nocase_was_on" -eq 0 ]] && shopt -u nocasematch
         if [[ -z "$v" ]]; then
@@ -585,12 +597,16 @@ fi
 # --- file con byte NUL (binari, UTF-16) --------------------------------------
 # Senza -a grep tratta un file con NUL come binario; con -a un NUL nella riga
 # stampata romperebbe il parsing. Questi file si scansionano quindi su copie:
-#   - BOM UTF-16 o UTF-32: decodifica con iconv. Se iconv manca si esce con 2
-#     (meglio bloccare che dare un falso "pulito").
-#   - firma binaria certa (is_binary_signature): saltato.
-#   - altrimenti due copie, con gli stessi numeri di riga: NUL tolti (ricompone il
-#     testo UTF-16/UTF-32 senza BOM) e NUL sostituiti da spazi (tiene il confine
+#   - firma binaria certa (is_binary_signature): saltato, con un avviso.
+#   - sempre due copie grezze, con gli stessi numeri di riga: NUL tolti (ricompone
+#     il testo ASCII in UTF-16/UTF-32) e NUL sostituiti da spazi (tiene il confine
 #     in "abc<NUL>valore", che la prima copia cancellerebbe).
+#   - con BOM UTF-16 o UTF-32 anche la decodifica con iconv. Non basta da sola: un
+#     BOM seguito da ASCII decodifica in CJK, e FF FE 00 00 può essere UTF-16 con
+#     U+0000 in testa, che letto come UTF-32 sparisce con exit 0. Se iconv manca si
+#     esce con 2.
+# Un errore mentre si prepara una copia (disco pieno, limite di file) dà exit 2: una
+# copia troncata potrebbe fermarsi prima del secret.
 # La scelta è per firma e non per densità di NUL: un UTF-16 senza BOM ha il 50% di
 # NUL come un binario, e la densità riaprirebbe quel falso negativo.
 
@@ -629,12 +645,18 @@ is_binary_signature() {
     return 1
 }
 
+copy_failed() {
+    log_fail "impossibile preparare la copia da leggere di: $1"
+    exit 2
+}
+
 normalize_nul_files() {
     local LC_ALL=C
     local i f nf rep scope enc _n=0
+    local -a _ps
     local -a old_real=("${REALPATHS[@]}") old_rep=("${REPORTPATHS[@]}") old_scope=("${SCOPEPATHS[@]}")
     REALPATHS=(); REPORTPATHS=(); SCOPEPATHS=(); _REPORTPATH_OF=(); _SCOPEPATH_OF=()
-    mkdir -p "$WORK_TMP/norm"
+    mkdir -p "$WORK_TMP/norm" || copy_failed "$WORK_TMP/norm"
     for i in "${!old_real[@]}"; do
         f="${old_real[$i]}"; rep="${old_rep[$i]}"; scope="${old_scope[$i]}"
         if [[ -z "${_NUL_FILES[$f]:-}" ]]; then
@@ -648,6 +670,7 @@ normalize_nul_files() {
             fffe*|feff*)       enc="UTF-16" ;;
         esac
         if [[ -z "$enc" ]] && is_binary_signature "$_SIG"; then
+            log_warn "saltato (firma binaria): $rep"
             continue
         fi
         _n=$((_n+1))
@@ -658,16 +681,19 @@ normalize_nul_files() {
                 exit 2
             fi
             # Un U+0000 decodificato tornerebbe NUL: spazio, come nella seconda copia.
-            iconv -c -f "$enc" -t UTF-8 < "$f" 2>/dev/null | tr '\000' ' ' > "$nf"
-            if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
-                add_target "$nf" "$rep" "$scope"
-                continue
+            iconv -c -f "$enc" -t UTF-8 < "$f" 2>/dev/null | tr '\000' ' ' > "$nf.dec"
+            _ps=("${PIPESTATUS[@]}")
+            [[ "${_ps[1]}" -eq 0 ]] || copy_failed "$rep"
+            # iconv che non decodifica non è un errore di copia: restano le grezze.
+            if [[ "${_ps[0]}" -eq 0 ]]; then
+                add_target "$nf.dec" "$rep" "$scope"
+            else
+                log_warn "iconv fallito su $rep: scansione senza decodifica"
             fi
-            log_warn "iconv fallito su $rep: scansione senza decodifica"
         fi
-        tr -d '\000' < "$f" > "$nf"
+        tr -d '\000' < "$f" > "$nf" || copy_failed "$rep"
         add_target "$nf" "$rep" "$scope"
-        tr '\000' ' ' < "$f" > "$nf.sp"
+        tr '\000' ' ' < "$f" > "$nf.sp" || copy_failed "$rep"
         add_target "$nf.sp" "$rep" "$scope"
     done
 }
@@ -750,9 +776,12 @@ if [[ "${#REALPATHS[@]}" -gt 0 ]]; then
         # -a: modalità testo (mai "Binary file matches", per byte non UTF-8).
         # --null: dopo il nome file un NUL al posto di ":", così un nome con
         # ":" o con newline non confonde il parsing. "--": nomi con "-".
+        # LC_ALL=C: confronto a byte. In UTF-8 un byte Latin-1 non vale come
+        # carattere e non farebbe da confine prima di una chiave. In questo locale -i
+        # piega solo l'ASCII: la regola in prosa elenca "è" ed "È" per esteso.
         grep_opts=(-nHEa --null)
         _flag_has "$flags" CI && grep_opts=(-nHEai --null)
-        run_grep_batched "$WORK_TMP/matches" grep "${grep_opts[@]}" -e "$regex"
+        LC_ALL=C run_grep_batched "$WORK_TMP/matches" grep "${grep_opts[@]}" -e "$regex"
         [[ -s "$WORK_TMP/matches" ]] || continue
         while IFS= read -r -d '' mfile && IFS= read -r mrest; do
             lineno="${mrest%%:*}"

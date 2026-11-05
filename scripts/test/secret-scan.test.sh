@@ -251,6 +251,8 @@ check "find fallito -> exit 2" 2 $?
 rm -f "$STUB/find"
 bash "$SCAN" "$WORK/non-esiste" >/dev/null 2>&1
 check "nessun path esistente -> exit 2" 2 $?
+bash "$SCAN" "$BD" "$WORK/non-esiste" >/dev/null 2>&1
+check "path mancante tra altri esistenti -> exit 2" 2 $?
 rm -rf "$BD"
 
 # Molti file, senza forzare i lotti. Su Linux la riga di comando unica supererebbe
@@ -302,7 +304,82 @@ if command -v iconv >/dev/null 2>&1; then
     check "200 KB ASCII e coda UTF-16 con secret -> exit 3" 3 $?
     check "200 KB ASCII e coda UTF-16: output" "coda.log:2:OPENAI_KEY" "$OUT"
     rm -f "$R"/u32*.txt "$R/u16be.txt" "$R/coda.log"
+
+    # BOM con coda ASCII di lunghezza pari: la decodifica la trasforma in CJK e iconv
+    # esce con 0. Devono bastare le copie grezze.
+    { printf '\377\376'; printf 'r\n' | iconv -f UTF-8 -t UTF-16LE; printf 'k = "%s"\n\n' "$VN"; } > "$R/bomascii.txt"
+    if [[ $(( $(wc -c < "$R/bomascii.txt") % 2 )) -ne 0 ]]; then printf ' ' >> "$R/bomascii.txt"; fi
+    bash "$SCAN" "$R/bomascii.txt" >/dev/null 2>&1
+    check "BOM UTF-16LE e coda ASCII pari con secret -> exit 3" 3 $?
+    rm -f "$R/bomascii.txt"
+
+    # FF FE 00 00 qui è UTF-16LE con U+0000 in testa, non UTF-32.
+    { printf '\377\376\000\000'; printf 'k = "%s"\n' "$VN" | iconv -f UTF-8 -t UTF-16LE; } > "$R/bomzero.txt"
+    bash "$SCAN" "$R/bomzero.txt" >/dev/null 2>&1
+    check "BOM UTF-16LE e primo carattere U+0000 con secret -> exit 3" 3 $?
+    rm -f "$R/bomzero.txt"
 fi
+
+echo "=== scanner: copie che non si riescono a scrivere ==="
+{ printf 'testa\000\n'; head -c 200000 /dev/zero | LC_ALL=C tr '\000' 'a'; printf '\nk = "%s"\n' "$VN"; } > "$R/grande.dat"
+# Il tr finto scrive una copia troncata e fallisce, come con il disco pieno.
+STUB2="$WORK/stub2"
+mkdir -p "$STUB2"
+printf '#!/bin/bash\nexit 1\n' > "$STUB2/tr"
+chmod +x "$STUB2/tr"
+PATH="$STUB2:$PATH" bash "$SCAN" "$R/grande.dat" >/dev/null 2>&1
+check "tr che fallisce sulla copia -> exit 2" 2 $?
+rm -rf "$STUB2"
+# Il limite vero: su Git Bash ulimit -f può non essere applicato, e la copia riesce.
+(ulimit -f 100 2>/dev/null; bash "$SCAN" "$R/grande.dat" >/dev/null 2>&1)
+RC=$?
+case "${OSTYPE:-}" in
+    msys*|cygwin*)
+        if [[ $RC -ne 0 ]]; then ok "ulimit -f 100, mai un falso pulito (exit $RC)"; else bad "ulimit -f 100: falso pulito"; fi ;;
+    *) check "ulimit -f 100: copia troncata -> exit 2" 2 "$RC" ;;
+esac
+rm -f "$R/grande.dat"
+
+echo "=== scanner: symlink e argomenti senza file ==="
+SD="$WORK/fuori3"
+mkdir -p "$SD/vera" "$SD/vuota"
+printf 'k = "%s"\n' "$VN" > "$SD/vera/s.txt"
+if ln -s "$SD/vera" "$SD/link-dir" 2>/dev/null && ln -s "$SD/vera/s.txt" "$SD/link-file" 2>/dev/null; then
+    bash "$SCAN" "$SD/link-dir" >/dev/null 2>&1
+    check "symlink a cartella come argomento -> exit 3" 3 $?
+    bash "$SCAN" "$SD/link-file" >/dev/null 2>&1
+    check "symlink a file come argomento -> exit 3" 3 $?
+else
+    echo "  [SKIP] ln -s non disponibile: test dei symlink saltati"
+fi
+ERR="$(bash "$SCAN" "$SD/vuota" 2>&1 >/dev/null)"
+check "cartella vuota come argomento -> exit 0" 0 $?
+if [[ "$ERR" == *"nessun file letto"* ]]; then ok "cartella vuota: avviso su stderr"; else bad "cartella vuota: nessun avviso"; fi
+printf 'x\n' > "$SD/foto.png"
+ERR="$(bash "$SCAN" "$SD/vera" "$SD/foto.png" 2>&1 >/dev/null)"
+check "argomento con soli file saltati, altro con secret -> exit 3" 3 $?
+if [[ "$ERR" == *"nessun file letto"*foto.png* ]]; then ok "file saltato come argomento: avviso su stderr"; else bad "file saltato come argomento: nessun avviso"; fi
+rm -rf "$SD"
+
+echo "=== scanner: confronto a byte con locale UTF-8 ==="
+{ printf '\351%s\n' "$VN"; } > "$R/latin1.txt"
+OUT="$(LC_ALL=C.UTF-8 bash "$SCAN" "$R/latin1.txt" 2>&1)"
+check "byte Latin-1 attaccato alla chiave -> exit 3" 3 $?
+check "byte Latin-1: output" "latin1.txt:1:OPENAI_KEY" "$OUT"
+rm -f "$R/latin1.txt"
+mkdir -p "$R/project-memories"
+printf 'la password è %s\n' "$PW" > "$R/project-memories/acc.md"
+OUT="$(LC_ALL=C.UTF-8 bash "$SCAN" "$R/project-memories/acc.md" 2>&1)"
+check "prosa con 'è', locale UTF-8" "project-memories/acc.md:1:SECRET_ASSIGNMENT_PROSE" "$OUT"
+OUT="$(LC_ALL=C bash "$SCAN" "$R/project-memories/acc.md" 2>&1)"
+check "prosa con 'è', locale C" "project-memories/acc.md:1:SECRET_ASSIGNMENT_PROSE" "$OUT"
+printf 'LA PASSWORD È %s\n' "$PW" > "$R/project-memories/acc.md"
+OUT="$(LC_ALL=C.UTF-8 bash "$SCAN" "$R/project-memories/acc.md" 2>&1)"
+check "prosa con 'È', locale UTF-8" "project-memories/acc.md:1:SECRET_ASSIGNMENT_PROSE" "$OUT"
+printf 'la password è your_password_here\n' > "$R/project-memories/acc.md"
+LC_ALL=C.UTF-8 bash "$SCAN" "$R/project-memories/acc.md" >/dev/null 2>&1
+check "prosa con 'è' e segnaposto -> exit 0" 0 $?
+rm -f "$R/project-memories/acc.md"
 
 echo "=== scanner: binari ==="
 BEGIN_PEM='-----BEG''IN PRIVATE KEY-----'
@@ -310,7 +387,7 @@ BEGIN_PEM='-----BEG''IN PRIVATE KEY-----'
 { printf 'MZ\220\000\003\000'; printf '%s\n' "$BEGIN_PEM"; } > "$R/lib.bin"
 bash "$SCAN" "$R/lib.bin" >/dev/null 2>&1
 check "DLL rinominata .bin -> exit 0" 0 $?
-for n in x.BIN x.Jar x.wasm x.DOCX x.DLL; do
+for n in x.JPG x.Jar x.wasm x.DOCX x.DLL; do
     printf 'k = "%s"\n' "$VN" > "$R/$n"
     bash "$SCAN" "$R/$n" >/dev/null 2>&1
     check "estensione binaria $n -> saltato" 0 $?
@@ -328,6 +405,14 @@ sig_case PE 'MZ\220\000'
 sig_case ELF '\177ELF'
 sig_case zip 'PK\003\004'
 sig_case wasm '\000asm'
+{ printf 'MZ\220\000'; printf '%s\n' "$BEGIN_PEM"; } > "$R/ignoto.dat"
+ERR="$(bash "$SCAN" "$R/ignoto.dat" 2>&1 >/dev/null)"
+if [[ "$ERR" == *"firma binaria"*ignoto.dat* ]]; then ok "firma binaria: avviso su stderr"; else bad "firma binaria: nessun avviso"; fi
+rm -f "$R/ignoto.dat"
+printf 'k = "%s"\n' "$VN" > "$R/testo.bin"
+bash "$SCAN" "$R/testo.bin" >/dev/null 2>&1
+check "file .bin di testo con secret -> exit 3" 3 $?
+rm -f "$R/testo.bin"
 # Non sono binari: niente firma, o testo che ci assomiglia.
 printf 'k = "%s"\n' "$VN" > "$R/bin"
 bash "$SCAN" "$R/bin" >/dev/null 2>&1

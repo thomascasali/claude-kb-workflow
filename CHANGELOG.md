@@ -52,14 +52,17 @@ two new guides, and a round of text corrections.
 ### Scripts
 - Secret scanner `scripts/lib/secret-scan.sh`, with an example pre-commit hook.
 - Restore test `scripts/restore-test.sh` and restore script `scripts/restore.sh`.
-- The scanner reads files with a NUL byte anywhere, including UTF-16 and UTF-32 with or without a BOM (with a BOM
-  it needs `iconv`, otherwise the scan stops with exit 2). It treats file and folder names as plain data (`:`, a leading
-  `-`, `$(...)`), and tolerates CR line endings and a missing final newline in the scope and allowlist files.
+- The scanner reads files with a NUL byte anywhere on two raw copies, one without the NUL bytes (ASCII text in UTF-16 or
+  UTF-32) and one with spaces in their place. With a UTF-16 or UTF-32 BOM it also decodes with `iconv`, and without `iconv`
+  the scan stops with exit 2. Rules compare bytes (`LC_ALL=C`), so a Latin-1 byte next to a key still counts as a boundary.
+  It treats file and folder names as plain data (`:`, a leading `-`, `$(...)`), follows a symlink given as an argument,
+  and tolerates CR line endings and a missing final newline in the scope and allowlist files.
   `wiki/projects/**` and `raw/**` get the prose password rule, also in scans outside a git repository.
 - Scanner arguments go to `grep` in batches, so a large tree no longer fails with "Argument list too long".
-  A failing `find` or `grep`, or no existing path, gives exit 2 and never a clean result.
-- Skipped without reading: more binary extensions, case-insensitive (`.bin`, `.jar`, `.wasm`, `.docx` and similar), and
-  files with NUL bytes that start with a certain binary signature. A secret inside those files is not found.
+  A failing `find` or `grep`, a path that does not exist (even one among others) or a copy that cannot be written gives
+  exit 2 and never a clean result. An existing argument that yields no file read gives a warning.
+- Skipped without reading: more binary extensions, case-insensitive (`.jar`, `.wasm`, `.docx` and similar), and, with a
+  warning, files with NUL bytes that start with a certain binary signature. A secret inside those files is not found.
 - `--staged` skips gitlinks (submodules) and also scans type changes. The `gitleaks` report stays in the scanner's work folder,
   which is now removed on HUP, INT and TERM too.
 - Tests passed on Git Bash for Windows and on Ubuntu 22.04 in WSL, not on macOS.
