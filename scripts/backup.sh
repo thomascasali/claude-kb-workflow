@@ -7,7 +7,7 @@
 
 set -e
 
-CLAUDE_HOME="$HOME/.claude"
+CLAUDE_HOME="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 GREEN='\033[0;32m'
@@ -19,10 +19,6 @@ echo -e "${GREEN}=== claude-kb-workflow — BACKUP ===${NC}"
 echo "Da: $CLAUDE_HOME"
 echo "A:  $REPO_DIR"
 echo ""
-
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
-    CLAUDE_HOME="/c/Users/$(whoami)/.claude"
-fi
 
 if [ ! -d "$CLAUDE_HOME" ]; then
     echo -e "${RED}Errore: $CLAUDE_HOME non trovato!${NC}"

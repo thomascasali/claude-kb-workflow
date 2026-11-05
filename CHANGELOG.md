@@ -1,5 +1,81 @@
 # Changelog
 
+## [0.4.0] - Unreleased
+
+Three model tiers, a promotion rule that matches how the toolkit is actually run,
+two new guides, and a round of text corrections.
+
+### Agents
+- New `quick-worker` (Haiku), the default for small, closed jobs that a test or a command can prove.
+  The pool is now 13 subagents (3 orchestrators and 10 specialists); every count in the docs was updated.
+- `fast-worker` (Sonnet) is redefined: unknown causes, choices between approaches that matter, wide changes
+  across files and tests, and the relaunch when Haiku comes back incomplete, with its work attached.
+- `deep-reasoner` (Opus) now covers design, plans and a second opinion before hard-to-undo actions, and is
+  the relaunch when Sonnet fails.
+- `docs/orchestration.md`, `docs/orchestrazione.md`, `agents/README-AGENTI.md`, `workflows/common-tasks.md`
+  and the README describe the three tiers and when to move up.
+- `ci-cd` and `mobile-dev`: the main release flow is GitHub Actions triggered by a tag, on a self-hosted
+  macOS runner. Codemagic stays as an alternative only. The example workflow no longer installs Flutter
+  with `subosito/flutter-action` on the runner, uses a non-bare Android build number and a completed
+  closed-test release.
+- `integrations`: Telegram and Gemini examples are generic; the project-specific example was removed.
+
+### Promotion rule
+- The old fixed threshold (seen on 2+ projects, 2+ sessions, verified in production) is replaced by the rule the
+  author actually applies, called the promotion exam: at least one of "used by 2+ projects", "a gotcha already
+  paid for that would cost an hour or more to hit again", "a declared standard", and in every case verified in
+  production or on a real device. Updated in the README, `llms.txt`, `/kb-promote`, `/kb-lint`, `/kb-ingest`,
+  the KB-driven workflow docs and the wiki template schema.
+
+### New guides
+- `docs/single-source-of-truth.md` and `docs/fonte-unica.md`: which kind of information lives where, and what
+  the other places may hold.
+- `docs/incremental-review-log.md` and `docs/review-log-incrementale.md`: review only `git diff <last-sha>..HEAD`,
+  with a review log kept in the project memory. `project-memories/_template.md` gains a "Review log" section.
+
+### Texts
+- Positioning is "knowledge that crosses your projects" and "shared knowledge layer" everywhere; the
+  older wording for the toolkit's category is gone, as is the claim about what survives between sessions
+  in the README problem list.
+- Dated or boasting claims removed (running since a given month, number of projects, "proven on", "years of").
+- Named production sites removed from the README; "new" version markers removed.
+- Skills: `docker compose up` only on local or staging in `verifica-prima-di-completare`; a red command in
+  `debugging-sistematico`, tests that count in `verifica-prima-di-completare`, a recommended answer in
+  `brainstorming-design` (ideas adapted from mattpocock/skills, MIT).
+- `LICENSE` header updated with the author's name and the Superpowers note.
+
+### Scripts
+- Secret scanner `scripts/lib/secret-scan.sh`, with an example pre-commit hook.
+- Restore test `scripts/restore-test.sh` and restore script `scripts/restore.sh`.
+
+## [0.3.2] - 2026-08-26
+
+Repositioning release, no functional changes to commands or agents.
+
+- README, llms.txt and docs now lead with the cross-project angle: Claude
+  Code's native auto-memory is per-project and per-machine; this toolkit is
+  the layer above it. An earlier claim in the README about what survives
+  between sessions was inaccurate and has been removed everywhere.
+- `patterns/critical-patterns.md` (30 mixed-quality items, Italian) split
+  into `patterns/patterns.md` (16 general patterns, English) and
+  `patterns/field-notes-it.md` (the author's own conventions, Italian,
+  clearly labeled). Old links to critical-patterns.md no longer resolve.
+- install.sh removes the stale `critical-patterns.md` from `~/.claude/patterns/`
+  on upgrade.
+- README prose cleanup (long dashes, wording that read as machine-written), a link to the interactive
+  presentation, and references to earlier internal versions removed.
+
+## [0.3.1] - 2026-08-13
+
+Initial public release.
+
+- Wiki to KB knowledge pipeline with the five `/kb-*` commands and the wiki template.
+- 12 orchestrated subagents with valid YAML frontmatter, 6 methodological skills.
+- 30 production patterns (split into general and personal files in 0.3.2).
+- Documentation in English and Italian.
+
+## Earlier history (before the public release)
+
 ## v0.3 — 2026-08-03
 
 ### 🌍 English front door
@@ -10,14 +86,14 @@
 ## v0.2.1 — 2026-08-02
 
 ### Riposizionamento
-- **README**: il toolkit si presenta ora per quello che lo distingue — **il sistema di
-  memoria** (pipeline Karpathy wiki→KB in produzione da aprile 2026 su 15+ progetti) —
-  con agenti/pattern/skill come dotazione. Le raccolte di agenti si sono commoditizzate
+- **README**: il toolkit si presenta ora per quello che lo distingue, la pipeline di
+  conoscenza wiki→KB (tradizione Karpathy) con promozione a maturità, con
+  agenti/pattern/skill come dotazione. Le raccolte di agenti si sono commoditizzate
   nel 2026; la pipeline di conoscenza con promozione a maturità no.
 - **Confronto aggiornato al panorama 2026** (`docs/confronto-superpowers.md`): Superpowers
   ~265k ⭐ e attivissimo, categoria dominata da Superpowers/GSD/gstack ("gstack pensa,
   GSD stabilizza, Superpowers esegue"). Posizionamento esplicito: **complementari, non
-  alternativi** — loro il metodo di esecuzione, noi il sistema di memoria.
+  alternativi** — loro il metodo di esecuzione, noi il livello di conoscenza condiviso.
 
 ## v0.2 — 2026-07-20
 
@@ -52,18 +128,3 @@ La release "il sistema ora funziona davvero".
 - Release iniziale: 10 agenti-documento, 22 pattern critici, 6 skill metodologiche,
   5 comandi `/kb-*`, template LLM wiki, guide (filosofia, workflow KB-driven,
   confronto Superpowers).
-
-## [0.3.2] - 2026-08-25
-
-Repositioning release, no functional changes to commands or agents.
-
-- README, llms.txt and docs now lead with the cross-project angle: Claude
-  Code's native auto-memory is per-project and per-machine; this toolkit is
-  the layer above it. The earlier "between sessions nothing survives" claim
-  was wrong and has been removed everywhere.
-- `patterns/critical-patterns.md` (30 mixed-quality items, Italian) split
-  into `patterns/patterns.md` (16 general patterns, English) and
-  `patterns/field-notes-it.md` (the author's own conventions, Italian,
-  clearly labeled). Old links to critical-patterns.md no longer resolve.
-- install.sh removes the stale `critical-patterns.md` from `~/.claude/patterns/`
-  on upgrade.

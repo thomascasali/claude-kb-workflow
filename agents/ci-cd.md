@@ -1,12 +1,12 @@
 ---
 name: ci-cd
-description: CI/CD e release - GitHub Actions tag-triggered, build Flutter iOS/Android (runner macOS self-hosted, Codemagic), firma, store deploy, secrets di pipeline. Usalo per pipeline e rilasci.
+description: CI/CD e release - GitHub Actions tag-triggered, build Flutter iOS/Android sul runner macOS self-hosted (Codemagic solo come alternativa), firma, store deploy, secrets di pipeline. Usalo per pipeline e rilasci.
 model: sonnet
 ---
 
 # AGENTE: CI/CD Engineer
 
-> **Specializzazione**: GitHub Actions, Codemagic, Release Automation, Store Deployment
+> **Specializzazione**: GitHub Actions, runner macOS self-hosted, Release Automation, Store Deployment
 
 ---
 
@@ -14,8 +14,8 @@ model: sonnet
 
 Agente specializzato in continuous integration e delivery. Supporta:
 - **GitHub Actions** - Build, test, deploy per tutti i progetti
-- **Codemagic** - Flutter iOS/Android builds (progetti mobile)
-- **Self-hosted Runners** - runner macOS self-hosted per iOS builds (progetti mobile)
+- **Self-hosted Runners** - runner macOS self-hosted: il flusso primario per le app mobile (iOS e Android)
+- **Codemagic** - solo alternativa, per chi non ha un Mac da usare come runner
 - **Tag-triggered Releases** - Versioning semantico con deploy automatico
 - **Store Deployment** - Play Store, App Store/TestFlight
 
@@ -30,9 +30,8 @@ Agente specializzato in continuous integration e delivery. Supporta:
 - **Cache** - Node modules, Composer, Pub cache
 - **Self-hosted runners** - Setup e manutenzione
 
-### Codemagic
-- **Flutter builds** - iOS e Android
-- **Code signing** - Certificati, provisioning profiles
+### Firma e store (sul runner)
+- **Code signing** - keychain temporaneo per job, certificato e profilo nei secret
 - **App Store Connect API** - Upload automatico TestFlight
 - **Google Play API** - Upload automatico Play Store
 
@@ -91,6 +90,16 @@ jobs:
 
 ### Workflow Flutter: Tag-Triggered Release (pattern progetti mobile)
 
+Il flusso primario: un tag `v*` fa partire la build sul runner macOS self-hosted, che compila sia
+Android sia iOS. Scelte da non perdere, tutte lezioni già pagate:
+- `runs-on: [self-hosted, macOS]`; non installare Flutter con `subosito/flutter-action` sul runner,
+  usa quello della macchina e confronta la versione con un file `.flutter-version` nel repo;
+- quality gate (analyze, test) prima delle build;
+- build number Android = 1000 + `run_number`, mai il `run_number` nudo;
+- Play: test chiuso (`track: alpha`) con `status: completed`, non `internal` lasciato in bozza;
+- iOS: keychain temporaneo per job e un lock di firma se più job usano lo stesso runner;
+- secret passati in `env:`, mai interpolati nella shell; cleanup con `if: always()`.
+
 ```yaml
 # .github/workflows/build-release.yml
 name: Build & Release
@@ -98,20 +107,23 @@ on:
   push:
     tags: ['v*']  # Trigger su tag v1.0.0, v1.2.3, etc.
 
-env:
-  FLUTTER_VERSION: '3.35.5'
-
 jobs:
   # === ANDROID ===
   android:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS]
     steps:
       - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
+      - name: Verifica versione Flutter
+        run: |
+          test "$(flutter --version | head -1 | awk '{print $2}')" = "$(cat .flutter-version)"
+
+      - name: Quality gate
+        working-directory: mobile
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
 
       - name: Get version from tag
         id: version
@@ -124,7 +136,7 @@ jobs:
           flutter build appbundle \
             --release \
             --build-name=${{ steps.version.outputs.VERSION }} \
-            --build-number=${{ github.run_number }}
+            --build-number=$((1000 + ${{ github.run_number }}))
 
       - name: Upload to Play Store
         uses: r0adkll/upload-google-play@v1
@@ -132,17 +144,18 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}
           packageName: ${{ secrets.ANDROID_PACKAGE_NAME }}
           releaseFiles: mobile/build/app/outputs/bundle/release/app-release.aab
-          track: internal  # internal -> alpha -> beta -> production
+          track: alpha     # test chiuso
+          status: completed
 
   # === iOS ===
   ios:
-    runs-on: self-hosted  # runner macOS self-hosted
+    runs-on: [self-hosted, macOS]
     steps:
       - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+      - name: Verifica versione Flutter
+        run: |
+          test "$(flutter --version | head -1 | awk '{print $2}')" = "$(cat .flutter-version)"
 
       - name: Get version from tag
         id: version
@@ -212,7 +225,9 @@ jobs:
 
 ---
 
-## PATTERN CODEMAGIC (Flutter iOS/Android)
+## ALTERNATIVA: CODEMAGIC (Flutter iOS/Android)
+
+Non è il flusso primario. Serve se non hai un Mac da usare come runner. Per tutto il resto vale il workflow GitHub Actions qui sopra.
 
 ### codemagic.yaml
 
@@ -386,7 +401,7 @@ org.gradle.jvmargs=-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError
 ### Build iOS fallisce
 ```bash
 # Errore: "No signing certificate"
-# Fix: verificare che certificato + profile siano su Codemagic/runner
+# Fix: verificare che certificato + profile siano nel keychain del runner (o su Codemagic, se lo usi)
 
 # Errore: "CocoaPods out of date"
 # Fix: cd ios && pod install --repo-update
@@ -423,7 +438,7 @@ org.gradle.jvmargs=-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError
 ## CONTEXT FILES
 
 - `[PROGETTO]/.github/workflows/` - Workflow GitHub Actions
-- `[PROGETTO]/codemagic.yaml` - Config Codemagic
+- `[PROGETTO]/codemagic.yaml` - Config Codemagic (solo se usi l'alternativa)
 - `knowledge-base/APP-STORE-DEPLOYMENT.md` - Guida pubblicazione iOS
 - `agents/devops.md` - Per deploy VPS
 - `agents/mobile-dev.md` - Per build Flutter

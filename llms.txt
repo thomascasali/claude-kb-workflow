@@ -1,18 +1,22 @@
 # claude-kb-workflow
 
-> Open-source knowledge pipeline for Claude Code, for people who maintain many unrelated projects alone. Claude Code's native memory is per-project and per-machine; this toolkit adds the cross-project layer: sessions → LLM wiki → stable KB, with a numeric promotion bar (seen on 2+ projects, 2+ sessions, verified in production). Ships orchestrated subagents, production patterns, methodological skills, and a documented restore dry-run that failed. English docs, native Italian included. MIT license.
+> Open-source knowledge pipeline for Claude Code, for people who maintain many unrelated projects alone. Claude Code's native memory is per-project and per-machine; this toolkit adds the cross-project layer: sessions → LLM wiki → stable KB, with a promotion exam (used by 2+ projects, or a gotcha already paid for, or a declared standard, and always verified in production). Ships orchestrated subagents, production patterns, methodological skills, and a documented restore dry-run that failed. English docs, native Italian included. MIT license.
 
 ## Docs
 
 - [README](README.md): overview, quick start, FAQ
 - [KB-driven workflow](docs/kb-driven-workflow.md): the three-tier pipeline, the 5 commands, the promotion gate
-- [Orchestration](docs/orchestration.md): lead + subagents, mandatory reviewer gate, the corrupted-frontmatter story
+- [Orchestration](docs/orchestration.md): lead + subagents, three model tiers (Haiku, Sonnet, Opus), mandatory reviewer gate, the corrupted-frontmatter story
 - [Knowledge disaster recovery](docs/knowledge-disaster-recovery.md): making a dev setup 100% restorable, the restore dry-run
 - [2026 comparison](docs/comparison-2026.md): vs Superpowers/GSD/gstack (complementary, not competing)
 - [Patterns](patterns/patterns.md): 16 generalized production patterns
+- [Single source of truth](docs/single-source-of-truth.md): which kind of information lives where, and what the other places may hold
+- [Incremental review log](docs/incremental-review-log.md): review only the diff since the last logged review
 
 ## Italiano
 
 - [Workflow KB-driven](docs/workflow-kb-driven.md)
 - [Orchestrazione](docs/orchestrazione.md)
 - [Disaster recovery della conoscenza](docs/disaster-recovery-conoscenza.md)
+- [Fonte unica](docs/fonte-unica.md)
+- [Review log incrementale](docs/review-log-incrementale.md)

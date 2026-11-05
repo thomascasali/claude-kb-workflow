@@ -21,8 +21,7 @@ agenti pronti. Competere sulla quantità di agenti non ha più senso per nessuno
 
 **Dove si colloca `claude-kb-workflow`**: in un'altra categoria — il **livello di conoscenza trasversale ai progetti**.
 Gli skills framework ti dicono *come eseguire* una sessione; questo repo si occupa di *cosa
-resta* dopo la sessione: la pipeline wiki→KB (pattern Karpathy, diventato virale ad aprile
-2026 — la nostra implementazione gira da quello stesso mese), i pattern
+resta* dopo la sessione: la pipeline wiki→KB (pattern Karpathy), i pattern
 pagati in produzione, il disaster recovery della conoscenza. **Si installano insieme senza
 conflitti: loro il metodo di esecuzione, noi il livello di conoscenza.**
 
@@ -32,7 +31,7 @@ conflitti: loro il metodo di esecuzione, noi il livello di conoscenza.**
 
 | | Superpowers | claude-kb-workflow |
 |---|-------------|---------------------|
-| **Cos'è** | Framework metodologico | Sistema di memoria: KB + wiki + agenti + pattern |
+| **Cos'è** | Framework metodologico | Livello di conoscenza condiviso: KB + wiki + agenti + pattern |
 | **Filosofia** | Imponi un workflow disciplinato | Cattura esperienza e rendila riusabile |
 | **Direzione** | Top-down (regole → pratica) | Bottom-up (pratica → regole) |
 | **Si occupa di** | Come esegui LA sessione | Cosa resta DOPO la sessione |
@@ -80,10 +79,10 @@ brainstorming → writing-plans → executing-plans → test-driven-development
 
 ## Cos'è claude-kb-workflow
 
-`claude-kb-workflow` parte da una premessa opposta: **non un framework, ma una memoria condivisa**.
+`claude-kb-workflow` parte da una premessa opposta: **non un framework, ma un livello di conoscenza condiviso**.
 
 ```
-12 subagent (2 orchestratori + 10 specialisti) (cosa fare per stack)
+13 subagent (3 orchestratori + 10 specialisti) (cosa fare per stack)
 + 16 pattern (cosa evitare, generalizzati da esperienza reale)
 + 6 skill metodologiche (come ragionare, leggermente)
 + Sistema KB-driven (come accumulare conoscenza nel tempo)
@@ -94,7 +93,7 @@ brainstorming → writing-plans → executing-plans → test-driven-development
 ✅ **Pattern reali**: ogni pattern viene da bug effettivi in produzione, non da teoria
 ✅ **Stratificazione**: separazione esplicita tra conoscenza fresca (wiki) e conoscenza autorevole (KB)
 ✅ **Multi-stack**: supporto esplicito a Laravel, Node, Vue, React, Flutter, Docker, MySQL/Mongo/PostgreSQL, IoT
-✅ **Italiano**: pensato per la community italiana, accessibile a studenti ITIS
+✅ **Italiano**: pensato per la community italiana, con documentazione nativa
 ✅ **Modulare**: installi solo le parti che ti servono
 ✅ **Auto-regolabile**: trigger descrittivi che l'utente può raffinare
 
@@ -167,7 +166,7 @@ In sostanza: 9 skill su 14 di Superpowers sono **duplicate da funzionalità nati
 
 | Feature kb-workflow | Stato in Superpowers |
 |---------------------|----------------------|
-| **12 subagent (2 orchestratori + 10 specialisti) per stack specifici** | Non presenti — Superpowers è stack-agnostic |
+| **13 subagent (3 orchestratori + 10 specialisti) per stack specifici** | Non presenti — Superpowers è stack-agnostic |
 | **16 pattern generalizzati da produzione reale** | Non presenti |
 | **`deploy-production-skill`** (Docker+Traefik) | Non presente |
 | **`flutter-production-skill`** (Firebase, streaming, push) | Non presente |

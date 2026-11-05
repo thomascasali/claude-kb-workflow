@@ -18,16 +18,31 @@ The benefit isn't (only) parallelization: it's that the lead's context stays
 clean and strategic, while the messy details (files read, attempts, test
 output) stay in the subagents' throwaway contexts.
 
-## The two-tier pool + specialists
+## The three-tier pool + specialists
 
 ```
-                       ┌─ deep-reasoner (Opus)    → architecture, complex debugging, algorithms
-  LEAD (orchestrates) ─┼─ fast-worker  (Sonnet)   → mechanical work, boilerplate, tests
+                       ┌─ quick-worker (Haiku)    → small, closed jobs a test or command can prove
+                       ├─ fast-worker  (Sonnet)   → unknown causes, real choices, wide changes
+  LEAD (orchestrates) ─┼─ deep-reasoner (Opus)    → design, plans, second opinion
                        ├─ 8 specialists (Sonnet)  → backend-dev, frontend-dev, mobile-dev,
                        │                            devops, database, integrations,
                        │                            realtime-dev, ci-cd
                        └─ 2 specialists (Opus)    → reviewer, security
 ```
+
+### Which model for which job
+
+Use the cheapest model that is enough, and move up only for a reason you can state.
+
+| Tier | Agent | Use it when | Escalate when |
+|---|---|---|---|
+| Haiku (default) | `quick-worker` | The "how" is decided and a test or a command proves the job is done: collecting local state, summaries, local or already-downloaded logs, bounded questions, mechanical edits, serial output, plans already written, first-pass review. | The job needs an unknown cause found, a choice between approaches, or many files: relaunch on `fast-worker` with the Haiku work attached. |
+| Sonnet | `fast-worker` and the specialists | An unknown cause to find, a choice between approaches that matters, wide changes across files and tests. | It returns incomplete or fails: relaunch on `deep-reasoner` with the work done so far. |
+| Opus | `deep-reasoner`, `reviewer`, `security` | Design, plans, deep platform knowledge, a second opinion before a hard-to-undo action, the final gate. | Nothing above it: the lead decides. |
+
+Limits for Haiku: no ssh or commands on production servers (that goes to `devops`),
+no files with secrets, and never the final gate. A domain with its own patterns
+(backend, mobile, deploy) goes to its specialist even when the job is small.
 
 **Mandatory gate**: before declaring work done, the result passes through
 `reviewer`. It's the highest-leverage single change in the
@@ -62,7 +77,10 @@ system: it forces a second read with a clean context.
    ## Orchestration flow (applies to all non-trivial work)
    You are the lead: plan, decompose, delegate to subagents — don't do
    the work yourself — and synthesize. Show the plan first, then execute.
-   - Reasoning -> deep-reasoner · Mechanical -> fast-worker
+   - Small, closed, testable jobs -> quick-worker (default)
+   - Unknown cause, real choice, wide changes -> fast-worker
+   - Design, plans, second opinion -> deep-reasoner
+   - Relaunch one tier up, with the previous work attached, when a tier fails.
    - For everything else, pick the specialist from the pool's description.
    - Mandatory gate: before declaring done, pass through `reviewer`.
    - Exception: trivial/conversational tasks done directly, no ceremony.

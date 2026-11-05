@@ -49,7 +49,7 @@ Le soluzioni naïve falliscono perché:
 └──────────────────────────────────────────────────────────────┘
                           │
                           │  /kb-promote [concetto]
-                          │  (criteri: ≥2 progetti, ≥2 sessioni, prod-verified)
+                          │  (esame di promozione: 2+ progetti | gotcha pagato | standard)
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
 │  LIVELLO 3: KB stabile (questo repo o fork)                  │
@@ -109,10 +109,10 @@ Le soluzioni naïve falliscono perché:
 
 ### `/kb-promote [concetto]`
 
-**Quando**: un concetto in `wiki/concepts/` è apparso in ≥2 progetti, è stato verificato in produzione, ed è stabile da ≥2 sessioni.
+**Quando**: un concetto in `wiki/concepts/` supera l'esame di promozione: vale almeno una tra "usato da ≥2 progetti", "gotcha già pagato che costerebbe almeno un'ora a rifarlo", "standard che dichiari"; e in ogni caso è verificato in produzione o su device reale.
 
 **Cosa fa**:
-1. Verifica i criteri di promozione
+1. Fa l'esame di promozione
 2. Sposta/copia il pattern dalla wiki alla KB stabile
 3. Aggiunge nota di promozione nella wiki
 4. Logga su entrambi i repo
@@ -264,7 +264,7 @@ Niente panico — i **transcript locali** di Claude Code sono una sorgente recup
 della wiki (credenziali incollate, nomi clienti, dettagli infrastruttura). I report del
 censimento e i raw che ne derivano vanno SOLO in repo privati, mai in KB pubbliche.
 
-La tecnica (collaudata su ~15 progetti in una sessione):
+La tecnica:
 
 1. **Mappa il gap**: per ogni progetto, confronta l'ultima data in `wiki/log.md` con le
    date dei transcript (o della cronologia sessioni). Ti esce la lista progetto → periodo scoperto.
@@ -293,7 +293,7 @@ di attivazione. I **pattern** sono conoscenza pura. La parte più legata a
 Claude Code è la **meccanica dei subagent** (frontmatter, auto-selezione,
 model tier) — ma i prompt di ruolo sono testo portabile e la policy (lead
 unico, gate reviewer) vale come metodo ovunque. Sintesi: **il motore è
-sostituibile, la memoria no** — ed è markdown in un repo git, il formato più
+sostituibile, la conoscenza no** — ed è markdown in un repo git, il formato più
 portabile che esista.
 
 

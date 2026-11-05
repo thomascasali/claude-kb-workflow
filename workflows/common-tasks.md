@@ -23,6 +23,22 @@
 | CORS problem | security | devops |
 | Performance issue | reviewer | database |
 | Setup nuovo progetto | devops | security, database |
+| Raccolta di stato locale, riassunto di un log, modifica meccanica | quick-worker | - |
+| Causa sconosciuta da trovare, modifica ampia su più file | fast-worker | reviewer |
+| Design, piano, secondo parere prima di un'azione difficile da annullare | deep-reasoner | reviewer |
+
+### Quale livello di modello
+
+Parti dal più economico che basta e sali solo per un motivo che sai dire.
+
+| Se il lavoro è... | Livello | Se torna incompleto |
+|---|---|---|
+| Piccolo e chiuso, provabile con un test o un comando | quick-worker (Haiku) | rilancia su fast-worker con il suo lavoro allegato |
+| Da indagare, con scelte vere o su più file | fast-worker (Sonnet) o lo specialista | rilancia su deep-reasoner con il lavoro fatto |
+| Design, piano, gate finale | deep-reasoner, reviewer, security (Opus) | decide il lead |
+
+Un dominio con pattern propri (backend, mobile, deploy) va allo specialista anche se l'incarico è piccolo.
+Dettagli in `docs/orchestrazione.md`.
 
 ---
 

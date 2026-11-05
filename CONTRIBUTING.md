@@ -53,7 +53,7 @@ description: Frase imperativa che descrive quando attivare. Da usare quando l'ut
 Un pattern è un **lesson learned da produzione**. Se regge fuori dal mio setup specifico va in `patterns/patterns.md`; se è una convenzione personale (script di deploy, naming env, provider VPS) va in `patterns/field-notes-it.md`.
 
 **Criteri di accettazione**:
-- ✅ Hai osservato il pattern in **almeno 2 progetti diversi**
+- ✅ Hai osservato il pattern in **almeno 2 progetti diversi**, oppure è un gotcha già pagato che costerebbe almeno 1 ora a chi lo reincontra
 - ✅ Hai esempio di codice **prima/dopo** (sbagliato/corretto)
 - ✅ Hai una **causa radice spiegata** (non solo "fai così")
 - ❌ Non è già coperto da pattern esistenti
@@ -111,6 +111,47 @@ Hai notato che una skill si attiva su task dove non dovrebbe (o viceversa)?
    - Cosa hai aggiunto/modificato
    - Perché (caso d'uso reale che ha portato al contributo)
    - Come hai testato
+
+---
+
+## Cosa non va mai pubblicato
+
+Il repo è pubblico e la cronologia git è per sempre: un segreto committato per sbaglio va considerato compromesso anche se lo cancelli subito dopo.
+
+Non committare mai:
+- credenziali di ogni tipo: password, token, chiavi API, chiavi private e certificati, file `.env`, file di credenziali di servizio
+- indirizzi IP, nomi di host e percorsi di server o macchine tue o di terzi
+- dati di clienti, di utenti o di colleghi, nomi inclusi, anche se anonimizzati male
+- il contenuto reale di `~/.claude`: cronologia delle sessioni, memorie personali, `settings.json`, stato di autenticazione delle skill
+- nomi di repository privati e dettagli dell'infrastruttura interna di chi contribuisce
+- screenshot e log che mostrano uno qualunque dei punti sopra
+
+Negli esempi usa segnaposto evidenti (`your_api_key_here`, `<TOKEN>`, `example.com`).
+
+### Scanner anti-segreti e hook pre-commit
+
+`scripts/lib/secret-scan.sh` cerca nei file i formati noti di chiavi (provider, chiavi PEM, JWT, URL con credenziali) e le assegnazioni del tipo `PASSWORD=...`. Non stampa mai il valore trovato, solo la posizione.
+
+Attiva l'hook una volta per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Da quel momento `.githooks/pre-commit` esegue lo scanner sui file in staging e blocca il commit se trova qualcosa. Per scansionare a mano:
+
+```bash
+bash scripts/lib/secret-scan.sh .            # tutto il repo
+bash scripts/lib/secret-scan.sh --staged     # solo i file in staging
+```
+
+Uscita: `0` pulito, `3` trovato qualcosa (righe `file:riga:REGOLA`), `2` errore d'uso. Lo scanner richiede bash 4 o superiore; è stato provato solo con Git Bash su Windows.
+
+Se la segnalazione è un falso positivo (per esempio una password d'esempio in una guida), verifica prima che la riga non contenga un valore vero. Poi aggiungi una voce a `.secret-allowlist` nella radice del repo, nel formato `path:REGOLA:sha256(riga)`. Il modello è in `.secret-allowlist.example`, con il comando per calcolare l'hash. Una voce vale solo per quella riga: se la modifichi, torna a essere segnalata.
+
+Se invece il segreto è vero, non usare l'allowlist: ruotalo presso il provider e rimuovilo dalla cronologia prima di aprire la PR.
+
+Le regole sono in `scripts/lib/secret-patterns.txt`, i perimetri per cartella in `scripts/lib/secret-scope.txt`. Il collaudo è `bash scripts/test/secret-scan.test.sh`.
 
 ---
 

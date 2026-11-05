@@ -17,7 +17,7 @@ Agente specializzato nello sviluppo mobile Flutter. Si occupa di:
 - State management con Provider/Riverpod
 - Integrazione API REST con JWT
 - Navigazione con GoRouter
-- Build e release Android/iOS
+- Build e release Android/iOS (il flusso di rilascio vero è GitHub Actions tag-triggered su runner macOS self-hosted, vedi `ci-cd`; Codemagic resta solo un'alternativa)
 - UI responsive e Material Design 3
 
 ---

@@ -18,7 +18,7 @@ Sessioni Claude / Git log / Bug risolti / Decisioni prese
         ▼  Compilazione LLM (auto durante ingest)
     wiki/                      ← pagine sintetizzate e intercollegate
         │
-        ▼  Promozione manuale (/kb-promote, quando il pattern è maturo)
+        ▼  Promozione manuale (/kb-promote, quando supera l'esame di promozione)
     KB stabile (repo esterno)  ← conoscenza curata permanente
 ```
 
@@ -117,12 +117,14 @@ Vedi `commands/kb-lint.md`.
 
 Promuove un concetto maturo dalla wiki alla KB stabile.
 
-**Criteri**:
-- Appare in ≥ 2 progetti
-- Stabile da ≥ 2 sessioni
-- Verificato in produzione
+**Esame di promozione** (vale ALMENO UNA):
+- È usato da almeno 2 progetti
+- È un gotcha già pagato, che costerebbe almeno un'ora a chi lo reincontra
+- Lo dichiari standard
 
-Vedi `commands/kb-promote.md`.
+E sempre: verificato in produzione o su device reale.
+
+Vedi `commands/kb-promote.md`. Dove vive ogni tipo di informazione: `docs/fonte-unica.md`.
 
 ---
 

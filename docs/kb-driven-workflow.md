@@ -49,7 +49,7 @@ Naive solutions fail because:
 └──────────────────────────────────────────────────────────────┘
                           │
                           │  /kb-promote [concept]
-                          │  (criteria: ≥2 projects, ≥2 sessions, prod-verified)
+                          │  (promotion exam: 2+ projects | paid gotcha | standard)
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
 │  TIER 3: Stable KB (this repo or fork)                       │
@@ -109,10 +109,10 @@ Naive solutions fail because:
 
 ### `/kb-promote [concept]`
 
-**When**: a concept in `wiki/concepts/` has appeared in ≥2 projects, has been verified in production, and has been stable for ≥2 sessions.
+**When**: a concept in `wiki/concepts/` passes the promotion exam: at least one of "used by 2+ projects", "a gotcha already paid for that would cost an hour or more to hit again", "a standard you declare"; and in every case it is verified in production or on a real device.
 
 **What it does**:
-1. Checks the promotion criteria
+1. Runs the promotion exam
 2. Moves/copies the pattern from the wiki to the stable KB
 3. Adds a promotion note in the wiki
 4. Logs to both repos
@@ -266,7 +266,7 @@ than the wiki (pasted credentials, client names, infrastructure details). The
 census reports and the raw material derived from them go ONLY into private
 repos, never into public KBs.
 
-The technique (proven on ~15 projects in a single session):
+The technique:
 
 1. **Map the gap**: for each project, compare the last date in `wiki/log.md`
    with the transcript dates (or session history). That gives you a list of project → period not covered.
@@ -297,7 +297,7 @@ in prose: the content ports anywhere, only the trigger mechanism changes. The
 **subagent mechanics** (frontmatter, auto-selection, model tiers) — but the
 role prompts are portable text and the policy (single lead, reviewer gate)
 works as a method everywhere. In short: **the engine is replaceable, the
-memory isn't** — and it's markdown in a git repo, the most portable format
+knowledge isn't** — and it's markdown in a git repo, the most portable format
 there is.
 
 

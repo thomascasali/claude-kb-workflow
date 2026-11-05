@@ -115,7 +115,7 @@ Niente qui dentro pretende di essere LA verità. Sono pattern che hanno funziona
 
 Il toolkit è in **versione 0.1**. Significa:
 
-- I pattern sono testati da anni di lavoro reale, ma in pochi contesti (mio)
+- I pattern vengono da lavoro reale, ma in pochi contesti (mio)
 - Le skill metodologiche sono adattate da Superpowers (collaudato in inglese) ma ancora non massivamente provate in italiano
 - Il sistema KB-driven è funzionante ma ha visto poca diffusione
 
@@ -130,4 +130,4 @@ Il feedback della community è ciò che farà passare il toolkit da 0.1 a 1.0.
 - **[obra/superpowers](https://github.com/obra/superpowers)** — l'idea che le skill metodologiche siano un cittadino di prima classe del workflow agentico
 - **Andrej Karpathy** — riflessioni pubbliche su come catturare conoscenza in sistemi LLM (raw → compiled → stable)
 - **Pragmatic Programmer** (Hunt/Thomas) — la disciplina dell'evidenza, della verifica, del catturare "ricette" da esperienza reale
-- **Anni di bug in produzione** — il vero compilatore di questo repo
+- **Bug in produzione** — il vero compilatore di questo repo

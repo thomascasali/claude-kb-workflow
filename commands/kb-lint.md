@@ -23,7 +23,7 @@ Esegui un controllo qualità completo della LLM Wiki in `$LLM_WIKI_PATH`.
 
 ### 🟢 INFO
 - Pattern in `wiki/concepts/` candidati a promozione nella KB stabile
-  (criteri: appare in ≥2 progetti, stabile da ≥2 sessioni, verificato in prod)
+  (esame di promozione: usato da ≥2 progetti, oppure gotcha già pagato, oppure standard dichiarato; sempre verificato in produzione)
 - Pagine `wiki/lessons/` non ancora linkate a pattern KB
 - Suggerimenti di merge per pagine simili
 

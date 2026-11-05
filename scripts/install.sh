@@ -70,7 +70,7 @@ for agent_file in "$REPO_DIR/agents/"*.md; do
     cp -f "$agent_file" "$CLAUDE_HOME/agents/"
 done
 cp -f "$REPO_DIR/agents/README-AGENTI.md" "$CLAUDE_HOME/"
-echo "  ✓ 12 agenti installati in $CLAUDE_HOME/agents/"
+echo "  ✓ 13 agenti installati in $CLAUDE_HOME/agents/"
 echo "  ✓ README-AGENTI.md installato in $CLAUDE_HOME/ (guida, non un agente)"
 echo "  ✓ Ogni agente ha frontmatter YAML (name/description/model): il lead li vede"
 echo "    e li sceglie automaticamente in base alla description, nessuna registrazione manuale"

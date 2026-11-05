@@ -1,0 +1,29 @@
+#!/bin/bash
+# .githooks/pre-commit — blocca il commit se scripts/lib/secret-scan.sh trova
+# un secret nei file in staging.
+#
+# Attivazione (una volta per clone):
+#   git config core.hooksPath .githooks
+#
+# Fail-closed: se lo scanner manca, il commit viene bloccato comunque.
+# Per un falso positivo confermato vedi .secret-allowlist.example.
+
+set -u
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+SCANNER="$REPO_ROOT/scripts/lib/secret-scan.sh"
+
+if [[ -z "$REPO_ROOT" || ! -f "$SCANNER" ]]; then
+    echo "[pre-commit] scripts/lib/secret-scan.sh non trovato in '$REPO_ROOT'" >&2
+    echo "[pre-commit] commit BLOCCATO per sicurezza." >&2
+    exit 1
+fi
+
+if ! bash "$SCANNER" --repo "$REPO_ROOT" --staged; then
+    echo "" >&2
+    echo "[pre-commit] commit BLOCCATO: secret rilevati nei file in staging (formato sopra: file:riga:regola, mai il valore)." >&2
+    echo "[pre-commit] se è un falso positivo confermato, aggiungilo a .secret-allowlist (path:regola:sha256(riga)) e riprova." >&2
+    exit 1
+fi
+
+exit 0

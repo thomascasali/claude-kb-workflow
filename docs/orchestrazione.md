@@ -18,16 +18,31 @@ Il vantaggio non è (solo) la parallelizzazione: è che il contesto del lead res
 pulito e strategico, mentre i dettagli sporchi (file letti, tentativi, output di
 test) restano nei contesti usa-e-getta dei subagent.
 
-## Il pool a due livelli + specialisti
+## Il pool a tre livelli + specialisti
 
 ```
-                    ┌─ deep-reasoner (Opus)    → architettura, debug complesso, algoritmi
-  LEAD (orchestra) ─┼─ fast-worker  (Sonnet)   → lavoro meccanico, parti standard, test
+                    ┌─ quick-worker (Haiku)    → incarichi piccoli e chiusi, provabili con un test
+                    ├─ fast-worker  (Sonnet)   → cause sconosciute, scelte vere, modifiche ampie
+  LEAD (orchestra) ─┼─ deep-reasoner (Opus)    → design, piani, secondo parere
                     ├─ 8 specialisti (Sonnet)  → backend-dev, frontend-dev, mobile-dev,
                     │                            devops, database, integrations,
                     │                            realtime-dev, ci-cd
                     └─ 2 specialisti (Opus)    → reviewer, security
 ```
+
+### Quale modello per quale lavoro
+
+Il modello più economico che basta; si sale solo per un motivo che si sa dire.
+
+| Livello | Agente | Quando | Si sale quando |
+|---|---|---|---|
+| Haiku (default) | `quick-worker` | Il "come" è deciso e un test o un comando prova che è fatto: raccolta di stato locale, riassunti, log locali o già scaricati, domande delimitate, modifiche meccaniche, output in serie, piani già scritti, review di primo passaggio. | Serve trovare una causa sconosciuta, scegliere tra approcci o toccare molti file: rilancio su `fast-worker` con il lavoro di Haiku allegato. |
+| Sonnet | `fast-worker` e gli specialisti | Causa sconosciuta da trovare, scelta tra approcci che conta, modifiche ampie su più file e test. | Torna incompleto o fallisce: rilancio su `deep-reasoner` con il lavoro fatto. |
+| Opus | `deep-reasoner`, `reviewer`, `security` | Design, piani, conoscenza profonda di piattaforma, secondo parere prima di azioni difficili da annullare, gate finale. | Sopra non c'è nulla: decide il lead. |
+
+Limiti per Haiku: niente ssh né comandi su server di produzione (va a `devops`), niente
+file con segreti, mai il gate finale. Un dominio con pattern propri (backend, mobile,
+deploy) va allo specialista anche se l'incarico è piccolo.
 
 **Gate obbligatorio**: prima di dichiarare un lavoro finito, il risultato passa da
 `reviewer`. È il singolo accorgimento con il miglior rapporto costo/benefici del
@@ -61,7 +76,10 @@ sistema: obbliga una seconda lettura con un contesto pulito.
    ## Flusso di orchestrazione (vale per ogni lavoro non banale)
    Tu sei il lead: pianifica, decomponi, delega ai subagent — non eseguire
    tu il lavoro — e sintetizza. Mostra prima il piano, poi esegui.
-   - Ragionamento -> deep-reasoner · Meccanico -> fast-worker
+   - Incarichi piccoli, chiusi, provabili -> quick-worker (default)
+   - Causa sconosciuta, scelta vera, modifiche ampie -> fast-worker
+   - Design, piani, secondo parere -> deep-reasoner
+   - Se un livello fallisce, rilancia quello sopra con il lavoro già fatto allegato.
    - Per il resto scegli lo specialista dalla description del pool.
    - Gate obbligatorio: prima di dichiarare finito, passa da `reviewer`.
    - Eccezione: task banali/conversazionali in prima persona, senza cerimonia.

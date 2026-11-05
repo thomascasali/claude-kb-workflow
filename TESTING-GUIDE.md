@@ -46,7 +46,7 @@ cd claude-kb-workflow
 ```
 
 Lo script ti chiederà conferma e copierà:
-- 12 agenti in `~/.claude/agents/`
+- 13 agenti in `~/.claude/agents/`
 - Pattern in `~/.claude/patterns/`
 - Workflow in `~/.claude/workflows/`
 - 6 skill in `~/.claude/skills/`

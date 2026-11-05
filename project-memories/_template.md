@@ -94,3 +94,13 @@ Lista dei pattern dal repo `claude-kb-workflow/patterns/patterns.md` (o convenzi
 ## 📝 Note libere
 
 [Spazio per appunti che non rientrano nelle sezioni sopra]
+
+---
+
+## 🔍 Review log
+
+| Data | SHA | Esito | Finding aperti |
+|---|---|---|---|
+| | | | |
+
+Una riga per review. Dalla seconda in poi si rivede solo `git diff <ultimo-sha>..HEAD`. Vedi `docs/review-log-incrementale.md`.

@@ -3,8 +3,9 @@
 > **Knowledge that crosses your projects.** Claude Code's native auto-memory is
 > per-project and per-machine: the lesson you paid for in one repo never
 > reaches the other twenty. This toolkit compiles sessions into a wiki and
-> promotes a page to a stable, cross-project KB only when it clears a
-> numeric bar: **seen on 2+ projects, 2+ sessions, verified in production.**
+> promotes a page to a stable, cross-project KB only when it passes the
+> promotion exam: **used by 2+ projects, or a gotcha already paid for, or a
+> declared standard, and in every case verified in production.**
 >
 > Skills frameworks like [Superpowers](https://github.com/obra/superpowers), GSD and gstack
 > tell you *how to run* a session; this toolkit is about *what's left afterwards*.
@@ -26,8 +27,8 @@ with the four silent gaps it exposed. Docs in English and Italian.
 
 When you work with Claude Code across multiple projects, you keep hitting the same problems:
 
-- **You lose context** between one session and the next
-- **You repeat the same mistakes** because there's no memory of lessons learned
+- **A lesson paid for in one repo never reaches the others**: Claude Code's auto-memory is per project and per machine
+- **You repeat the same mistakes** across projects, because each one learns alone
 - **Different stacks need different patterns**, but you write them all from memory every time
 - **Architectural decisions** made months ago get forgotten
 
@@ -45,21 +46,27 @@ Real sessions (messy) → LLM Wiki (living synthesis) → Stable KB (authoritati
                                                      (only when mature)
 ```
 
-An implementation of Karpathy's LLM Wiki pattern (which went viral in April
-2026; this pipeline has been running since that same month, and the toolkit
-has shipped it since May), with the layer missing from the write-ups I found:
-**promotion to the stable KB with maturity criteria** (2+ projects, verified
-in production). See [the full KB-driven workflow](docs/kb-driven-workflow.md)
+An implementation of Karpathy's LLM Wiki pattern, with the layer missing from
+the write-ups I found: **promotion to the stable KB through a promotion exam**.
+A page qualifies when at least one of these holds: it is used by 2 or more
+projects, it is a gotcha already paid for that would cost an hour or more to
+hit again, or you declare it a standard. In every case it must also be verified
+in production or on a real device. See [the full KB-driven workflow](docs/kb-driven-workflow.md),
+[where each kind of information lives](docs/single-source-of-truth.md),
+[the incremental review log](docs/incremental-review-log.md)
 and the [knowledge disaster recovery](docs/knowledge-disaster-recovery.md).
 Prefer slides? The same method as [an interactive presentation in five acts](https://thomascasali.github.io/presentazione-kb-workflow/?lang=en), in English and Italian.
 
 ### 2. Orchestrated subagents (`agents/`)
 
-12 subagents **with valid YAML frontmatter** (name/description/model): Claude
+13 subagents **with valid YAML frontmatter** (name/description/model): Claude
 registers them automatically and the main model (the **lead**) picks them
-on its own based on the description. Two tiers:
+on its own based on the description. Three model tiers, and you move up only
+for a reason you can state:
 
-- **Orchestrators**: `deep-reasoner` (Opus, reasoning phases) and `fast-worker` (Sonnet, mechanical work)
+- **Haiku, the default**: `quick-worker` for small, closed jobs that a test or a command can prove
+- **Sonnet**: `fast-worker` for an unknown cause, a choice between approaches, or wide changes; it is also the relaunch when Haiku comes back incomplete, with its work attached
+- **Opus**: `deep-reasoner` for design, plans and a second opinion; it is the relaunch when Sonnet fails
 - **10 multi-stack specialists**: `backend-dev`, `frontend-dev`, `mobile-dev`, `devops`, `database`, `integrations`, `realtime-dev`, `ci-cd` (Sonnet) + `reviewer`, `security` (Opus)
 
 The full system is in [`docs/orchestration.md`](docs/orchestration.md): flat
@@ -69,8 +76,7 @@ story of how corrupted frontmatter kept the whole thing dormant for months.
 ### 3. Patterns (`patterns/`)
 
 **16 patterns** in [`patterns/patterns.md`](patterns/patterns.md), generalized from
-production bugs on live sites (fivbeach.com, maraffaonline.it, tornei.app) so they
-hold up outside my own setup:
+production bugs on live sites so they hold up outside my own setup:
 - Laravel/Express routing errors, a Flutter+Stripe Android gotcha, Docker bind-mount permissions
 - Socket.io disconnects, a Cloudflare WAF bypass via self-hosted WARP, multi-tenant single-DB SaaS
 - Internal SSO, sync-selector catch-22, cold-cache page speed, git/deploy over an unstable network, OTP e-signatures, FCM push without the server SDK, idempotent payment webhooks
@@ -131,7 +137,7 @@ It doesn't impose a method and it doesn't replace your judgment. Install the
 parts you want: agents, patterns and skills work without the wiki.
 
 The patterns here come from production bugs, not from theory, and nothing
-reaches the KB until it has held up on a second project. Skills activate by
+reaches the KB until it passes the promotion exam. Skills activate by
 description: if one slows you down, narrow its trigger or delete it.
 
 Deeper dive → [docs/filosofia.md](docs/filosofia.md) (in Italian)
@@ -142,7 +148,7 @@ Deeper dive → [docs/filosofia.md](docs/filosofia.md) (in Italian)
 
 | Aspect | Superpowers | claude-kb-workflow |
 |---------|-------------|---------------------|
-| What it is | Methodological framework (TDD-strict, plan-driven) | Memory system: KB + wiki + agents + patterns |
+| What it is | Methodological framework (TDD-strict, plan-driven) | Shared knowledge layer: KB + wiki + agents + patterns |
 | **Concerned with** | **How you run *the* session** | **What remains AFTER the session** |
 | Base unit | Skills that chain rigid phases | Agents, patterns, project-memory |
 | Target | a disciplined loop inside one session | many unrelated projects over time |
@@ -166,20 +172,20 @@ It does: auto memory is on by default and works well, per project, per
 machine. That is exactly its limit. Each repo accumulates its own notes, and
 what you learn in project A never reaches projects B through T. This toolkit
 adds the layer above: a cross-project wiki and a stable KB that every
-project's sessions can read, with an explicit promotion bar between the two.
+project's sessions can read, with an explicit promotion exam between the two.
 
 ### How is this different from CLAUDE.md?
 
 CLAUDE.md is a single static file you maintain by hand, and it grows until it
 becomes noise. This system separates fresh knowledge (wiki, updated per
-session) from authoritative knowledge (KB, promoted only when verified in
-production on 2+ projects), so what it reads is the part that held up.
+session) from authoritative knowledge (KB, promoted only when it passes the promotion
+exam), so what it reads is the part that held up.
 
 ### claude-kb-workflow vs Superpowers — which one do I need?
 
 Both, if anything. Superpowers (like GSD and gstack) governs *how the agent
 runs a session*: TDD, plans, guardrails. This toolkit governs *what survives
-the session*: the memory. They install side by side without conflicts. See
+the session*: the knowledge. They install side by side without conflicts. See
 [the 2026 comparison](docs/comparison-2026.md).
 
 ### Do I need the wiki to use the agents?
@@ -191,7 +197,7 @@ lesson being relearned on a second project.
 
 ### Does this only work with Claude Code?
 
-The engine is replaceable; the memory isn't. It's markdown, git and
+The engine is replaceable; the knowledge isn't. It's markdown, git and
 conventions, so it should port to Cursor, Codex CLI or aider. I've only run
 it in Claude Code. The most Claude Code-specific part is the subagent
 mechanics; the role prompts and the policies port anywhere. Details in
@@ -207,10 +213,11 @@ claude-kb-workflow/
 ├── TESTING-GUIDE.md             # Guide for people who want to test the toolkit
 ├── CONTRIBUTING.md              # How to contribute
 ├── LICENSE                      # MIT
-├── agents/                      # 12 subagents with frontmatter
+├── agents/                      # 13 subagents with frontmatter
 │   ├── README-AGENTI.md         # Decision tree + orchestration
-│   ├── deep-reasoner.md         # Opus — reasoning phases (NEW)
-│   ├── fast-worker.md           # Sonnet — mechanical work (NEW)
+│   ├── quick-worker.md          # Haiku: small, closed jobs (default)
+│   ├── fast-worker.md           # Sonnet: unknown causes, choices, wide changes
+│   ├── deep-reasoner.md         # Opus: design, plans, second opinion
 │   ├── backend-dev.md           # Laravel + Node.js
 │   ├── frontend-dev.md          # Vue + React
 │   ├── mobile-dev.md            # Flutter
@@ -220,7 +227,7 @@ claude-kb-workflow/
 │   ├── integrations.md          # Stripe, Email, Google, Push, AI
 │   ├── security.md              # JWT + Auth + CORS
 │   ├── realtime-dev.md          # Socket.io + WebSocket + MQTT
-│   └── ci-cd.md                 # GitHub Actions + Codemagic
+│   └── ci-cd.md                 # GitHub Actions on a self-hosted macOS runner (Codemagic as alternative)
 ├── patterns/                    # patterns + personal field notes
 │   ├── patterns.md              # 16 generalized patterns (English)
 │   └── field-notes-it.md        # personal conventions, Italian (worked example)
@@ -248,13 +255,19 @@ claude-kb-workflow/
 │   └── esempio-saas-fittizio.md
 ├── docs/                        # Deep dives
 │   ├── filosofia.md
-│   ├── orchestration.md / orchestrazione.md        # Lead+subagent system
+│   ├── orchestration.md / orchestrazione.md        # Lead+subagent system, three model tiers
+│   ├── single-source-of-truth.md / fonte-unica.md  # Where each kind of information lives
+│   ├── incremental-review-log.md / review-log-incrementale.md  # Review only what changed since the last review
 │   ├── knowledge-disaster-recovery.md / disaster-recovery-conoscenza.md  # 100%-restorable knowledge
 │   ├── kb-driven-workflow.md / workflow-kb-driven.md    # + retroactive census from transcripts
 │   └── comparison-2026.md / confronto-superpowers.md
 └── scripts/
     ├── install.sh               # Interactive installation
-    └── backup.sh                # Sync ~/.claude/ → repo (for forks)
+    ├── backup.sh                # Sync ~/.claude/ → repo (for forks)
+    ├── restore.sh               # Repo → ~/.claude/ (no overwrite without --force)
+    ├── restore-test.sh          # Restore test on an empty temporary HOME
+    ├── lib/secret-scan.sh       # Secret scanner, also used by .githooks/pre-commit
+    └── test/                    # Scanner tests
 ```
 
 ---
@@ -300,7 +313,7 @@ MIT. See [LICENSE](LICENSE). Fork it, modify it, redistribute it. If it's useful
 
 - **Methodological skills** (`debugging-sistematico`, `verifica-prima-di-completare`, `brainstorming-design`) adapted from [obra/superpowers](https://github.com/obra/superpowers) (MIT) and [mattpocock/skills](https://github.com/mattpocock/skills) (MIT)
 - **Two-tier KB-driven pattern** inspired by Andrej Karpathy's discussions on managing LLM knowledge
-- **Agent architecture** evolved from years of real work on web/mobile/IoT projects
+- **Agent architecture** evolved from real work on web, mobile and IoT projects
 
 ---
 
@@ -313,20 +326,23 @@ MIT. See [LICENSE](LICENSE). Fork it, modify it, redistribute it. If it's useful
 > **Conoscenza che attraversa i progetti.** L'auto-memory nativa di Claude Code
 > è per-progetto e per-macchina: la lezione pagata su un repo non arriva mai
 > agli altri venti. Questo toolkit compila le sessioni in una wiki e promuove
-> una pagina alla KB stabile e trasversale solo quando supera una soglia in
-> cifre: **vista su 2+ progetti, 2+ sessioni, verificata in produzione.**
+> una pagina alla KB stabile e trasversale solo quando supera l'esame di
+> promozione: **usata da 2+ progetti, oppure un gotcha già pagato, oppure uno
+> standard dichiarato, e in ogni caso verificata in produzione.**
 >
 > Gli skills framework come [Superpowers](https://github.com/obra/superpowers), GSD e gstack
 > ti dicono *come eseguire* una sessione; questo toolkit si occupa di *cosa resta dopo*.
 > **Sono complementari: si installano insieme senza conflitti**. Vedi
 > [il confronto aggiornato al 2026](docs/confronto-superpowers.md).
 
-I 4 documenti di approfondimento hanno una versione italiana nativa:
+I documenti di approfondimento hanno una versione italiana nativa:
 
 - [docs/orchestrazione.md](docs/orchestrazione.md) — sistema lead + subagent
 - [docs/workflow-kb-driven.md](docs/workflow-kb-driven.md) — sistema a 3 livelli sessione → wiki → KB
 - [docs/disaster-recovery-conoscenza.md](docs/disaster-recovery-conoscenza.md) — conoscenza ripristinabile al 100%
 - [docs/confronto-superpowers.md](docs/confronto-superpowers.md) — confronto con Superpowers/GSD/gstack
+- [docs/fonte-unica.md](docs/fonte-unica.md) — dove vive ogni tipo di informazione
+- [docs/review-log-incrementale.md](docs/review-log-incrementale.md) — rivedere solo ciò che è cambiato dall'ultima review
 - [Presentazione interattiva in cinque atti](https://thomascasali.github.io/presentazione-kb-workflow/) — lo stesso metodo raccontato per gli studenti (italiano e inglese)
 
 ### Avvio rapido

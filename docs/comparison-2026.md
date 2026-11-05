@@ -22,10 +22,8 @@ sense for anyone.
 
 **Where `claude-kb-workflow` sits**: in a different category — the
 **cross-project knowledge layer**. Skills frameworks tell you *how to run* a session; this repo is
-about what's left after the session: the wiki→KB pipeline (Karpathy
-pattern, which went viral in April 2026 — our implementation has been
-running since that same month), patterns
-battle-tested in production, knowledge disaster recovery. **They install
+about what's left after the session: the wiki→KB pipeline (the Karpathy
+pattern), patterns drawn from production bugs, knowledge disaster recovery. **They install
 side by side without conflicts: their execution method, our knowledge layer.**
 
 ---
@@ -34,7 +32,7 @@ side by side without conflicts: their execution method, our knowledge layer.**
 
 | | Superpowers | claude-kb-workflow |
 |---|-------------|---------------------|
-| **What it is** | Methodological framework | Memory system: KB + wiki + agents + patterns |
+| **What it is** | Methodological framework | Shared knowledge layer: KB + wiki + agents + patterns |
 | **Philosophy** | Imposes a disciplined workflow | Captures experience and makes it reusable |
 | **Direction** | Top-down (rules → practice) | Bottom-up (practice → rules) |
 | **Concerned with** | How you run THE session | What remains AFTER the session |
@@ -85,10 +83,10 @@ brainstorming → writing-plans → executing-plans → test-driven-development
 
 ## What claude-kb-workflow is
 
-`claude-kb-workflow` starts from the opposite premise: **not a framework, but a shared memory**.
+`claude-kb-workflow` starts from the opposite premise: **not a framework, but a shared knowledge layer**.
 
 ```
-12 subagents (2 orchestrators + 10 specialists) (what to do per stack)
+13 subagents (3 orchestrators + 10 specialists) (what to do per stack)
 + 16 patterns (what to avoid, generalized from real experience)
 + 6 methodological skills (how to reason, lightly)
 + KB-driven system (how to accumulate knowledge over time)
@@ -99,7 +97,7 @@ brainstorming → writing-plans → executing-plans → test-driven-development
 ✅ **Real patterns**: every pattern comes from actual production bugs, not theory
 ✅ **Stratification**: explicit separation between fresh knowledge (wiki) and authoritative knowledge (KB)
 ✅ **Multi-stack**: explicit support for Laravel, Node, Vue, React, Flutter, Docker, MySQL/Mongo/PostgreSQL, IoT
-✅ **Italian**: built for the Italian community, accessible to vocational-school (ITIS) students
+✅ **Italian**: built for the Italian community, with native Italian docs
 ✅ **Modular**: install only the parts you need
 ✅ **Self-tunable**: descriptive triggers that the user can refine
 
@@ -177,7 +175,7 @@ native features** or covered by other toolkits. That's why
 
 | kb-workflow feature | Status in Superpowers |
 |---------------------|----------------------|
-| **12 subagents (2 orchestrators + 10 specialists) for specific stacks** | Not present — Superpowers is stack-agnostic |
+| **13 subagents (3 orchestrators + 10 specialists) for specific stacks** | Not present — Superpowers is stack-agnostic |
 | **16 patterns generalized from real production** | Not present |
 | **`deploy-production-skill`** (Docker+Traefik) | Not present |
 | **`flutter-production-skill`** (Firebase, streaming, push) | Not present |

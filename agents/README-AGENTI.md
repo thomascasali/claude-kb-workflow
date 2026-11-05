@@ -26,19 +26,20 @@ Gli agenti coprono i seguenti stack — ognuno è documentato con sezioni dedica
 | **Database** | MySQL 8, PostgreSQL 16, MongoDB 7, Firestore |
 | **Realtime** | Socket.io, WebSocket, Pusher, MQTT, WebRTC |
 | **Infra** | Docker + Docker Compose, Traefik 3, Nginx, Linux VPS |
-| **CI/CD** | GitHub Actions, Codemagic (Flutter) |
+| **CI/CD** | GitHub Actions (runner macOS self-hosted per Flutter), Codemagic come alternativa |
 | **Integrazioni** | Stripe, SumUp, Email (SMTP/SES), Push (FCM/APNs), Telegram Bot, Gemini AI |
 
 ---
 
 ## Lista Agenti
 
-**Orchestratori** (v0.2 — vedi `docs/orchestrazione.md`):
+**Orchestratori, tre livelli di modello** (vedi `docs/orchestrazione.md`):
 
 | Agente | Model | Usa per |
 |--------|-------|---------|
-| **deep-reasoner** | opus | Fasi ad alto ragionamento: architettura, debug complesso, algoritmi |
-| **fast-worker** | sonnet | Lavoro meccanico: parti standard, test, formattazione |
+| **quick-worker** | haiku | Default: incarichi piccoli e chiusi, verificabili con un test o un comando |
+| **fast-worker** | sonnet | Causa sconosciuta, scelta tra approcci, modifiche ampie; rilancio di quick-worker |
+| **deep-reasoner** | opus | Design, piani, debug complesso, secondo parere; rilancio di fast-worker |
 
 **Specialisti di dominio**:
 
@@ -51,7 +52,7 @@ Gli agenti coprono i seguenti stack — ognuno è documentato con sezioni dedica
 | **database** | sonnet | Schema, Migration, Query, Backup (MySQL/MongoDB/PostgreSQL/Firestore) |
 | **integrations** | sonnet | Stripe, Email, Google APIs, Push notifications |
 | **realtime-dev** | sonnet | Socket.io, WebSocket, MQTT, WebRTC |
-| **ci-cd** | sonnet | GitHub Actions, build mobile, firma, store deploy |
+| **ci-cd** | sonnet | GitHub Actions (tag-triggered, runner macOS self-hosted), firma, store deploy |
 | **reviewer** | opus | Debug, Bug fix, Code review, Performance — **il gate di qualità** |
 | **security** | opus | JWT, Auth flows, CORS, Middleware, Data protection |
 
@@ -82,7 +83,7 @@ INFRASTRUTTURA?
 |-- Deploy                    -> devops
 |-- Container issues          -> devops + reviewer
 |-- SSL/Network               -> devops
-|-- CI/CD                     -> devops
+|-- CI/CD                     -> ci-cd (+ devops per il deploy sul VPS)
 |
 DATI?
 |-- Import/Export             -> database
@@ -130,8 +131,9 @@ NON SO?
 ~/.claude/
 |-- agents/
 |   |-- README-AGENTI.md        # Questa guida
-|   |-- deep-reasoner.md        # Opus - fasi di ragionamento
-|   |-- fast-worker.md          # Sonnet - lavoro meccanico
+|   |-- quick-worker.md         # Haiku - incarichi piccoli e chiusi (default)
+|   |-- fast-worker.md          # Sonnet - cause da trovare, scelte, modifiche ampie
+|   |-- deep-reasoner.md        # Opus - design, piani, secondo parere
 |   |-- backend-dev.md          # Laravel + Node.js
 |   |-- frontend-dev.md         # Vue.js + React
 |   |-- mobile-dev.md           # Flutter/Dart
@@ -139,7 +141,7 @@ NON SO?
 |   |-- database.md             # MySQL/MongoDB/PostgreSQL/Firestore
 |   |-- integrations.md         # Stripe/Email/APIs
 |   |-- realtime-dev.md         # Socket.io/WebSocket/MQTT/WebRTC
-|   |-- ci-cd.md                # GitHub Actions/store deploy
+|   |-- ci-cd.md                # GitHub Actions (runner macOS self-hosted)/store deploy
 |   |-- reviewer.md             # Debug/Code Review (gate)
 |   |-- security.md             # JWT/Auth/CORS
 |-- patterns/
@@ -182,20 +184,26 @@ Per capire quale stack usa il progetto corrente:
 
 ## Orchestrazione
 
-Il sistema di lavoro è a due livelli:
+Il sistema di lavoro ha un lead e un pool di subagent su tre livelli di modello:
 
 - **Lead** = orchestratore: pianifica, decompone, sintetizza. Per policy delega
   SOLO il lead: l'annidamento (subagent che delega ad altri subagent) è tecnicamente
   possibile ma moltiplica token/latenza — evitalo (vedi `docs/orchestrazione.md`).
-- **deep-reasoner** (Opus) = fasi ad alto ragionamento; **fast-worker** (Sonnet) = lavoro meccanico.
+- **Tre livelli, si sale solo per un motivo che si sa dire.** **quick-worker** (Haiku) è il default per
+  incarichi piccoli e chiusi che un test o un comando può provare. **fast-worker** (Sonnet) prende le cause
+  sconosciute, le scelte tra approcci che contano e le modifiche ampie su più file, ed è il rilancio
+  quando Haiku torna incompleto, con il suo lavoro allegato. **deep-reasoner** (Opus) prende design,
+  piani e il secondo parere prima di azioni difficili da annullare, ed è il rilancio quando Sonnet
+  torna incompleto. `reviewer` e `security` (Opus) coprono il gate finale e la sicurezza.
+- Un dominio con pattern propri (backend, mobile, deploy) va allo specialista, anche se l'incarico è piccolo.
 - Gli specialisti di dominio (backend-dev, frontend-dev, mobile-dev, devops, database,
   integrations, realtime-dev, ci-cd, reviewer, security) sono subagent veri: hanno frontmatter
   YAML (`name`/`description`/`model`) e il lead li vede e li sceglie AUTOMATICAMENTE in base alla
   `description` — non serve elencarli in CLAUDE.md né dentro altri agenti.
 - La `description` nel frontmatter È il criterio di selezione: tenerla precisa.
 - Politica di routing (quando usare chi): definiscila nel tuo `~/.claude/CLAUDE.md` globale
-  (es. una sezione "Flusso di orchestrazione" con le fasi ad alto ragionamento su deep-reasoner,
-  il lavoro meccanico su fast-worker, e un gate di review obbligatorio prima di dichiarare
-  un lavoro finito).
+  (es. una sezione "Flusso di orchestrazione" con gli incarichi piccoli e chiusi su quick-worker,
+  le cause da trovare e le modifiche ampie su fast-worker, le fasi di design su deep-reasoner,
+  e un gate di review obbligatorio prima di dichiarare un lavoro finito).
 - Backup/versionamento di questi agenti: questo stesso repo (`agents/`) — tienilo aggiornato
   con `git pull` e ricopia in `~/.claude/agents/` quando aggiorni un agente (vedi `scripts/install.sh`).

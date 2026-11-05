@@ -4,17 +4,23 @@ Promuovi il concetto specificato da `llm-wiki/wiki/concepts/` alla **KB stabile*
 
 > **Path**: `$LLM_WIKI_PATH` per la wiki, `$KB_PATH` per la KB stabile (es. clone locale di `claude-kb-workflow`).
 
-## Criteri di eleggibilità (verifica prima di procedere)
+## Esame di promozione (verifica prima di procedere)
 
-- [ ] Appare in ≥ 2 progetti diversi
-- [ ] Stabile da ≥ 2 sessioni (controlla `wiki/log.md`)
-- [ ] Verificato in produzione (non solo teorico)
+Deve valere ALMENO UNA di queste:
+
+- [ ] È usato da almeno 2 progetti
+- [ ] È un gotcha già pagato, che costerebbe almeno un'ora a chi lo reincontra
+- [ ] Lo dichiari standard (per esempio il flusso di login che vuoi in ogni app)
+
+E sempre:
+
+- [ ] Verificato in produzione o su device reale (non solo teorico)
 - [ ] Non già presente in `$KB_PATH/patterns/patterns.md` o `$KB_PATH/patterns/field-notes-it.md`
 
 ## Steps
 
 1. Leggi `$LLM_WIKI_PATH/wiki/concepts/[concetto].md`
-2. Verifica i criteri sopra — se non soddisfatti, avvisa l'utente e fermati
+2. Fai l'esame di promozione sopra — se non è superato, avvisa l'utente e fermati
 3. Identifica destinazione in `$KB_PATH/`:
    - Pattern riusabile cross-progetto → `patterns/patterns.md` (aggiungi sezione)
    - Convenzione personale (deploy, naming, provider) → `patterns/field-notes-it.md`
@@ -37,6 +43,6 @@ Promuovi il concetto specificato da `llm-wiki/wiki/concepts/` alla **KB stabile*
 
 ## Filosofia
 
-La promozione è un **rito di stabilizzazione**: una conoscenza nasce sporca nelle sessioni, viene sintetizzata nella wiki, e solo dopo prove ripetute "guadagna" il posto nella KB stabile.
+La promozione è un **rito di stabilizzazione**: una conoscenza nasce sporca nelle sessioni, viene sintetizzata nella wiki, e solo dopo l'esame di promozione "guadagna" il posto nella KB stabile.
 
 Questo evita il rumore: la KB resta piccola, focalizzata, autorevole. La wiki resta viva, sperimentale, mutevole.

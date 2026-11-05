@@ -19,8 +19,8 @@ Agente specializzato nelle integrazioni con servizi esterni:
 - **Google APIs** - Sheets, Drive (progetti API-first)
 - **Push Notifications** - FCM, Web Push (VAPID)
 - **WebSocket** - Pusher
-- **Telegram Bot API** - Notifiche/briefing schedulati (Assistente AI)
-- **Gemini AI** - Generazione contenuti, estrazione PDF (Assistente AI)
+- **Telegram Bot API** - Notifiche e riepiloghi schedulati
+- **Gemini AI** - Generazione di testi, estrazione da PDF
 
 ---
 
@@ -335,7 +335,7 @@ $translations = [
 // MAIL_HOST=smtp.gmail.com
 // MAIL_PORT=587
 // MAIL_USERNAME=email@domain.com
-// MAIL_PASSWORD=app_password
+// MAIL_PASSWORD=<your-app-password>
 
 // Invio email
 use Illuminate\Support\Facades\Mail;
@@ -538,7 +538,7 @@ PUSHER_APP_SECRET=...
 
 ---
 
-## TELEGRAM BOT API (Assistente AI)
+## TELEGRAM BOT API
 
 ### Setup Bot
 
@@ -548,15 +548,15 @@ const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 
 // Invio messaggio formattato (Markdown)
 await bot.sendMessage(chatId, `
-*Briefing del ${date}*
-📅 Orario: ${schedule}
-📝 Verifiche: ${tests}
-📋 Circolari: ${circulars}
+*Riepilogo del ${date}*
+📅 Appuntamenti: ${appointments}
+📝 Scadenze: ${deadlines}
+📋 Novità: ${updates}
 `, { parse_mode: 'Markdown' });
 
 // Gestione comandi
 bot.onText(/\/start/, (msg) => {
-    bot.sendMessage(msg.chat.id, 'Benvenuto! Riceverai il briefing ogni mattina.');
+    bot.sendMessage(msg.chat.id, 'Benvenuto! Riceverai il riepilogo ogni mattina.');
 });
 
 // CRITICO: Non esporre il token! Sempre in .env
@@ -567,17 +567,17 @@ bot.onText(/\/start/, (msg) => {
 ```javascript
 const cron = require('node-cron');
 
-// Briefing mattutino alle 7:00, lun-sab (skip festivi)
+// Riepilogo mattutino alle 7:00, lun-sab (skip festivi)
 cron.schedule('0 7 * * 1-6', async () => {
     if (await isHoliday(new Date())) return; // Skip festivi
-    const briefing = await generateBriefing();
-    await bot.sendMessage(TEACHER_CHAT_ID, briefing, { parse_mode: 'Markdown' });
+    const digest = await generateDigest();
+    await bot.sendMessage(OWNER_CHAT_ID, digest, { parse_mode: 'Markdown' });
 });
 ```
 
 ---
 
-## GEMINI AI INTEGRATION (Assistente AI)
+## GEMINI AI INTEGRATION
 
 ### Setup e Chiamata API
 
@@ -585,15 +585,14 @@ cron.schedule('0 7 * * 1-6', async () => {
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Gemini 2.5 Flash — cost-effective per daily briefings (~$8/mese)
+// Gemini Flash: modello economico, adatto a riepiloghi periodici
 const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-async function generateBriefing(context) {
-    const prompt = `Sei un assistente scolastico. Genera un briefing mattutino conciso basato su:
-    - Orario: ${context.schedule}
-    - Verifiche programmate: ${context.tests}
-    - Circolari: ${context.circulars}
-    - Presenze: ${context.attendance}
+async function generateDigest(context) {
+    const prompt = `Genera un riepilogo mattutino conciso basato su:
+    - Appuntamenti: ${context.appointments}
+    - Scadenze: ${context.deadlines}
+    - Novità: ${context.updates}
 
     Formato: bullet points, max 500 parole, tono professionale.`;
 
@@ -601,8 +600,7 @@ async function generateBriefing(context) {
     return result.response.text();
 }
 
-// CRITICO: Gemini Flash per costi contenuti
-// Gemini Pro per task complesse (analisi PDF lunghi)
+// Flash per costi contenuti, Pro per task complesse (analisi di PDF lunghi)
 ```
 
 ### PDF Content Extraction
@@ -612,7 +610,7 @@ const pdfParse = require('pdf-parse');
 
 async function extractPdfContent(buffer) {
     const data = await pdfParse(buffer);
-    return data.text; // Testo estratto dalla circolare
+    return data.text; // Testo estratto dal documento
 }
 ```
 

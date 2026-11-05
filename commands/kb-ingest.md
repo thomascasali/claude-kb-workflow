@@ -56,4 +56,4 @@ Esegui un ingest nella LLM Wiki per il progetto o argomento specificato: $ARGUME
 Non duplicare info già nella **KB stabile**. La wiki cattura lo stato *dinamico*
 (sessione corrente, open issues, decisioni recenti). La KB cattura pattern *stabili*.
 
-I criteri di promozione da wiki → KB stabile sono definiti in `/kb-promote`.
+L'esame di promozione da wiki → KB stabile è definito in `/kb-promote`.
