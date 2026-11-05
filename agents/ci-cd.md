@@ -93,12 +93,17 @@ jobs:
 Un tag `v*` fa partire le build. Android gira su un runner ospitato, iOS richiede macOS.
 Scelte da non perdere, tutte lezioni già pagate:
 - Android: `runs-on: ubuntu-latest` e Flutter installato con `subosito/flutter-action`, alla versione
-  scritta in un file `.flutter-version` nel repo;
+  scritta in un file `.flutter-version` nel repo. L'input `flutter-version-file` dell'action legge
+  `pubspec.yaml`, `.fvmrc` o `.fvm/fvm_config.json`, non questo file: un passo lo legge e lo mette
+  in `$GITHUB_ENV`;
 - iOS: `runs-on: macos-latest` (ospitato) come default. Un runner macOS self-hosted è l'alternativa:
   lì Flutter è quello della macchina, quindi confronta la sua versione con `.flutter-version`;
 - **non usare runner self-hosted su repo pubblici**: una pull request può far eseguire codice
   arbitrario sulla tua macchina. Usali solo su repo privati;
-- quality gate (analyze, test) prima delle build;
+- quality gate (analyze, test) in un job a sé: `android` e `ios` partono solo con `needs: quality`;
+- Android: keystore e `key.properties` creati dai secret durante il job e rimossi con `if: always()`.
+  Il `build.gradle` dell'app deve leggere `key.properties` (è la configurazione di firma descritta
+  nella documentazione Flutter);
 - build number Android = 1000 + `run_number`, mai il `run_number` nudo;
 - Play: test chiuso (`track: alpha`) con `status: completed`, non lasciato in bozza. Su un'app ancora
   in bozza `completed` viene rifiutato: usa `status: draft` finché la prima release non è
@@ -116,28 +121,65 @@ on:
     tags: ['v*']  # Trigger su tag v1.0.0, v1.2.3, etc.
 
 jobs:
-  # === ANDROID (runner ospitato) ===
-  android:
+  # === QUALITY GATE: nessuna build se fallisce ===
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Read Flutter version
+        run: echo "FLUTTER_VERSION=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_ENV"
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version-file: .flutter-version   # oppure: flutter-version: '3.x.y'
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
-      - name: Quality gate
+      - name: Analyze e test
         working-directory: mobile
         run: |
           flutter pub get
           flutter analyze
           flutter test
 
+  # === ANDROID (runner ospitato) ===
+  android:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read Flutter version
+        run: echo "FLUTTER_VERSION=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_ENV"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
       - name: Get version from tag
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Keystore e key.properties
+        working-directory: mobile
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload-keystore.jks"
+          {
+            printf 'storeFile=%s\n' "$RUNNER_TEMP/upload-keystore.jks"
+            printf 'storePassword=%s\n' "$KEYSTORE_PASSWORD"
+            printf 'keyAlias=%s\n' "$KEY_ALIAS"
+            printf 'keyPassword=%s\n' "$KEY_PASSWORD"
+          } > android/key.properties
 
       - name: Build AAB
         working-directory: mobile
@@ -160,8 +202,13 @@ jobs:
           track: alpha     # test chiuso
           status: completed  # app ancora in bozza: status: draft
 
+      - name: Pulizia keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload-keystore.jks" mobile/android/key.properties
+
   # === iOS (macOS) ===
   ios:
+    needs: quality
     runs-on: macos-latest   # alternativa: [self-hosted, macOS], solo su repo privati
     # Lock di firma: un solo job iOS alla volta, così nessun altro job sostituisce
     # la lista dei keychain a metà firma. Vale per i job di questo repo.
@@ -171,12 +218,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Read Flutter version
+        run: echo "FLUTTER_VERSION=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_ENV"
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version-file: .flutter-version
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-        # Su self-hosted togli questo step e confronta la versione della macchina:
+        # Su self-hosted togli questi due step e confronta la versione della macchina:
         # test "$(flutter --version | head -1 | awk '{print $2}')" = "$(cat .flutter-version)"
 
       - name: Get version from tag
@@ -245,8 +296,8 @@ jobs:
           rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/build.mobileprovision"
 ```
 
-Il workflow non è stato eseguito qui: adatta nomi dei secret, percorso `mobile/` e
-`ExportOptions.plist` al tuo progetto prima del primo tag.
+Il workflow non è stato eseguito qui: adatta nomi dei secret, percorso `mobile/`,
+`ExportOptions.plist` e firma in `build.gradle` al tuo progetto prima del primo tag.
 
 ### Workflow Laravel: Backend + Frontend Deploy
 
@@ -386,7 +437,8 @@ git tag v1.2.0
 git push origin v1.2.0
 
 # 4. CI/CD fa il resto:
-#    - Build Android AAB → Play Store (internal)
+#    - Quality gate (analyze, test), poi le build
+#    - Build Android AAB → Play Store (test chiuso, track alpha)
 #    - Build iOS IPA → TestFlight
 #    - (Opzionale) Deploy backend/frontend su VPS
 ```
@@ -394,9 +446,9 @@ git push origin v1.2.0
 ### Promuovere Release
 
 ```bash
-# Play Store: internal → production
+# Play Store: test chiuso (alpha) → production
 # Tramite Play Console o API:
-# fastlane supply --track internal --track_promote_to production
+# fastlane supply --track alpha --track_promote_to production
 
 # App Store: TestFlight → App Store Review
 # Tramite App Store Connect UI (richiede review manuale Apple)
@@ -425,7 +477,11 @@ KEY_PASSWORD=<password>
 # Flutter iOS
 APP_STORE_API_KEY_ID=<key ID>
 APP_STORE_ISSUER_ID=<issuer ID>
-APP_STORE_API_KEY=<contenuto .p8>
+APP_STORE_API_KEY_P8=<contenuto .p8>
+IOS_KEYCHAIN_PASSWORD=<password del keychain temporaneo>
+IOS_CERT_P12_BASE64=<certificato .p12 codificato base64>
+IOS_CERT_PASSWORD=<password del .p12>
+IOS_PROVISIONING_PROFILE_BASE64=<profilo codificato base64>
 
 # Firebase
 FIREBASE_SERVICE_ACCOUNT=<JSON>

@@ -16,10 +16,12 @@ two new guides, and a round of text corrections.
   and the README describe the three tiers and when to move up.
 - `ci-cd` and `mobile-dev`: the release flow is GitHub Actions triggered by a tag. Android runs on a hosted
   `ubuntu-latest` runner with `subosito/flutter-action`; only iOS needs macOS, with `macos-latest` as the
-  default and a self-hosted runner as an alternative (never on public repos). The example workflow uses a
-  non-bare Android build number, a completed closed-test release (`status: draft` for apps still in draft,
-  plus `releaseName`), secrets passed through `env:`, a temporary keychain with a signing lock and an
-  `if: always()` cleanup. The workflow was not run as part of this change. Codemagic stays as an alternative.
+  default and a self-hosted runner as an alternative (never on public repos). The example workflow has a
+  `quality` job that both builds need, reads `.flutter-version` into `$GITHUB_ENV` for `flutter-action`,
+  signs Android from secrets, and uses a non-bare Android build number, a completed closed-test release
+  (`status: draft` for apps still in draft, plus `releaseName`), secrets passed through `env:`, a temporary
+  keychain with a signing lock and an `if: always()` cleanup. The workflow was not run: its YAML blocks were only
+  parsed. Codemagic stays as an alternative.
 - `integrations`: Telegram and Gemini examples are generic; the project-specific example was removed.
 
 ### Promotion rule
@@ -33,7 +35,8 @@ two new guides, and a round of text corrections.
 - `docs/single-source-of-truth.md` and `docs/fonte-unica.md`: which kind of information lives where, and what
   the other places may hold.
 - `docs/incremental-review-log.md` and `docs/review-log-incrementale.md`: review only `git diff <last-sha>..HEAD`,
-  with a review log kept in the project memory. `project-memories/_template.md` gains a "Review log" section.
+  with a review log kept in the project memory. `project-memories/_template.md` and the example gain a
+  "Review log" section; the `project-memories` README and example now keep project state as a link to the wiki page.
 
 ### Texts
 - Positioning is "knowledge that crosses your projects" and "shared knowledge layer" everywhere; the
@@ -49,9 +52,17 @@ two new guides, and a round of text corrections.
 ### Scripts
 - Secret scanner `scripts/lib/secret-scan.sh`, with an example pre-commit hook.
 - Restore test `scripts/restore-test.sh` and restore script `scripts/restore.sh`.
-- The scanner reads files with NUL bytes and UTF-16 (decoded with `iconv`; without it the scan stops with exit 2),
-  handles file names with `:` or a leading `-`, tolerates CR line endings and a missing final newline in the
-  scope and allowlist files, and `wiki/projects/**` and `raw/**` now get the prose password rule.
+- The scanner reads files with a NUL byte anywhere, including UTF-16 and UTF-32 with or without a BOM (with a BOM
+  it needs `iconv`, otherwise the scan stops with exit 2). It treats file and folder names as plain data (`:`, a leading
+  `-`, `$(...)`), and tolerates CR line endings and a missing final newline in the scope and allowlist files.
+  `wiki/projects/**` and `raw/**` get the prose password rule, also in scans outside a git repository.
+- Scanner arguments go to `grep` in batches, so a large tree no longer fails with "Argument list too long".
+  A failing `find` or `grep`, or no existing path, gives exit 2 and never a clean result.
+- Skipped without reading: more binary extensions, case-insensitive (`.bin`, `.jar`, `.wasm`, `.docx` and similar), and
+  files with NUL bytes that start with a certain binary signature. A secret inside those files is not found.
+- `--staged` skips gitlinks (submodules) and also scans type changes. The `gitleaks` report stays in the scanner's work folder,
+  which is now removed on HUP, INT and TERM too.
+- Tests passed on Git Bash for Windows and on Ubuntu 22.04 in WSL, not on macOS.
 - New `.gitattributes` forces LF on `*.sh`, `.githooks/*`, `scripts/lib/*.txt` and `.secret-allowlist*`, so a clone
   with `core.autocrlf=true` keeps working.
 - `scripts/backup.sh` stops with a clear message when the target is not a git repository, no longer suggests

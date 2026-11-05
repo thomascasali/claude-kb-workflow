@@ -1,7 +1,7 @@
 # MEMORY: TaskFlow (esempio fittizio)
 
 > **Aggiornato**: 2026-05-19
-> **Stato**: production
+> **Stato**: vedi la pagina del progetto nella wiki (`wiki/projects/taskflow.md`), non qui
 > **Tags**: #saas #vue #laravel #mysql #stripe
 >
 > ⚠️ **Questo è un esempio inventato** per mostrare la struttura di una project memory. Nessuna relazione con prodotti reali.
@@ -75,22 +75,11 @@ Target: team da 5-20 persone, prezzo €8/utente/mese.
 
 ---
 
-## 📋 Stato attuale (rolling)
+## 📋 Stato corrente
 
-**Ultima sessione**: 2026-05-19
-
-**Cosa è stato fatto recentemente**:
-- Migrazione da Pinia 2 a 3 (breaking change su `setup` stores)
-- Implementato dark mode con preferenza salvata in user settings
-- Refactor Stripe controller per gestire `customer.subscription.trial_will_end`
-
-**Prossimi passi pianificati**:
-- [ ] Implementare 2FA con TOTP
-- [ ] Migrazione MySQL 8.0 → 8.4 (testare su staging prima)
-- [ ] Pannello admin per metriche utilizzo
-
-**Bloccanti**:
-- Decisione di prodotto su 2FA: TOTP o magic link? (in discussione con team)
+Non si tiene in questa pagina. Fase, versione, cosa è live, prossimi passi e bloccanti stanno nella
+pagina wiki `wiki/projects/taskflow.md`, sezione "Stato corrente" (vedi `docs/fonte-unica.md`).
+Qui restano i fatti stabili e il review log.
 
 ---
 
@@ -128,3 +117,13 @@ Convenzioni personali da `claude-kb-workflow/patterns/field-notes-it.md`:
 - Stripe events maneggiati: `customer.subscription.{created,updated,deleted}`, `invoice.payment_{succeeded,failed}`, `customer.subscription.trial_will_end`.
 - Backup DB: cron giornaliero alle 03:00 UTC, retention 30 giorni.
 - Email digest settimanale parte ogni lunedì alle 09:00 timezone utente.
+
+---
+
+## 🔍 Review log
+
+| Data | SHA | Esito | Finding aperti |
+|---|---|---|---|
+| 2026-05-19 | a1b2c3d | review completa, 2 fix applicati | nessuno |
+
+Una riga per review. Dalla seconda in poi si rivede solo `git diff <ultimo-sha>..HEAD`. Vedi `docs/review-log-incrementale.md`.

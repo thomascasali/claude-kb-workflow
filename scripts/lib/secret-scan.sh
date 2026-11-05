@@ -30,7 +30,9 @@
 #           ritrovamento, nel formato esatto
 #               file:riga:REGOLA
 #           MAI il valore trovato, MAI il contenuto della riga.
-#   exit 2  errore d'uso (argomenti mancanti, regole illeggibili, ecc.).
+#   exit 2  errore d'uso o d'ambiente (argomenti mancanti, regole illeggibili,
+#           find o grep falliti su un file o per troppi argomenti): mai un falso
+#           "pulito" su qualcosa che non si è riusciti a leggere.
 #
 # Regole: secret-patterns.txt (formato nell'intestazione di quel file).
 # Scope per path: secret-scope.txt (override: variabile SECRET_SCOPE_FILE).
@@ -45,15 +47,19 @@
 # caricato. Il path è relativo alla radice del repo git del file; per un file
 # fuori da qualsiasi repo e senza --rel-root è il path come passato.
 #
-# Lettura dei file: grep in modalità testo (-a). I file con byte NUL e quelli
-# UTF-16 con BOM sono scansionati su una copia normalizzata (iconv; senza
-# iconv e con un file UTF-16: exit 2). I path possono contenere ":" o iniziare
-# per "-". Scope e allowlist tollerano CR finali e l'assenza del newline finale.
+# Lettura dei file: grep in modalità testo (-a), a lotti di argomenti (una riga
+# di comando unica supererebbe il limite del sistema con molti file). I file con
+# un byte NUL in qualunque punto sono scansionati su copie normalizzate: vedi la
+# sezione "file con byte NUL". Saltati: estensioni binarie note (senza distinzione
+# di maiuscole) e firme binarie certe in testa al file. I path possono contenere
+# ":" o iniziare per "-". Scope e allowlist tollerano CR finali e l'assenza del
+# newline finale.
 #
 # Se `gitleaks` è nel PATH viene eseguito come livello aggiuntivo sugli
 # argomenti che sono directory (best-effort: un suo fallimento dà un WARN).
 #
-# Note di implementazione: richiede bash 4+ (array associativi, ${x,,}).
+# Note di implementazione: scritto per bash 4+ (array associativi, ${x,,}),
+# provato solo sulle versioni elencate in CONTRIBUTING.md.
 # Usa pipe invece di process substitution annidate, che su Git Bash/MSYS
 # possono bloccarsi, e scrive i risultati in variabili globali invece di usare
 # $(...) nelle funzioni chiamate per ogni file (una subshell per file è lenta
@@ -103,13 +109,19 @@ if [[ ! -f "$PATTERNS_FILE" ]]; then
     exit 2
 fi
 
-# Estensioni di binari da saltare senza aprirli (glob sul basename).
-_BINARY_GLOBS=(
-    '*.png' '*.jpg' '*.jpeg' '*.gif' '*.webp' '*.ico' '*.pdf' '*.zip' '*.gz'
-    '*.tar' '*.7z' '*.exe' '*.dll' '*.so' '*.dylib' '*.woff' '*.woff2'
-    '*.ttf' '*.otf' '*.mp4' '*.mp3' '*.mov' '*.sqlite' '*.sqlite3' '*.db'
-    '*.class' '*.pyc'
-)
+# Estensioni di binari da saltare senza aprirli. Confronto in minuscolo su una
+# mappa: costo costante per file, anche su decine di migliaia di file.
+declare -A _BINARY_EXT=()
+for _ext in \
+    png jpg jpeg gif webp ico bmp tif tiff heic avif psd \
+    pdf doc docx xls xlsx ppt pptx odt ods odp \
+    zip gz tgz bz2 xz tar 7z rar jar war ear apk aab ipa deb rpm dmg iso msi \
+    exe dll so dylib bin o a lib obj pdb wasm class pyc \
+    woff woff2 ttf otf eot \
+    mp4 mp3 mov avi mkv webm wav flac ogg aac m4a \
+    sqlite sqlite3 db; do
+    _BINARY_EXT["$_ext"]=1
+done
 _MAX_BYTES=10485760   # 10MB: oltre, si salta con un WARN.
 
 # File "meta" dello scanner: contengono per forza i nomi delle regole e delle
@@ -118,15 +130,13 @@ _MAX_BYTES=10485760   # 10MB: oltre, si salta con un WARN.
 _META_BASENAMES=('.secret-allowlist' '.secret-allowlist.example' 'secret-patterns.txt' 'secret-scope.txt')
 
 is_binary_skip_cheap() {
-    local f="$1" base="${1##*/}" m g
+    local base="${1##*/}" m ext
     for m in "${_META_BASENAMES[@]}"; do
         [[ "$base" == "$m" ]] && return 0
     done
-    for g in "${_BINARY_GLOBS[@]}"; do
-        # shellcheck disable=SC2053
-        [[ "$base" == $g ]] && return 0
-    done
-    return 1
+    [[ "$base" == *.* ]] || return 1
+    ext="${base##*.}"
+    [[ -n "${_BINARY_EXT[${ext,,}]+x}" ]]
 }
 
 # Versione completa (basename + dimensione): solo per pochi file, mai in un
@@ -155,23 +165,40 @@ expand_targets() {
             log_warn "non trovato, saltato: $t"
         fi
     done
-    [[ "${#existing[@]}" -eq 0 ]] && return 0
+    if [[ "${#existing[@]}" -eq 0 ]]; then
+        log_fail "nessuno dei path indicati esiste"
+        exit 2
+    fi
 
-    find "${existing[@]}" -type f -not -path '*/.git/*' -size +10M -print0 2>/dev/null | while IFS= read -r -d '' big; do
+    # Su file, non in pipe: l'exit code di find non va perso (una cartella
+    # illeggibile non è "nessun secret").
+    if ! find "${existing[@]}" -type f -not -path '*/.git/*' -size +10M -print0 \
+            > "$WORK_TMP/big.list" 2> "$WORK_TMP/find.err" \
+        || ! find "${existing[@]}" -type f -not -path '*/.git/*' -not -size +10M -print0 \
+            > "$WORK_TMP/found.list" 2> "$WORK_TMP/find.err"; then
+        log_fail "find fallito, scansione incompleta: $(head -n 3 "$WORK_TMP/find.err")"
+        exit 2
+    fi
+    while IFS= read -r -d '' big; do
         log_warn "saltato (>10MB): $big"
-    done
-    find "${existing[@]}" -type f -not -path '*/.git/*' -not -size +10M -print0 2>/dev/null | while IFS= read -r -d '' f; do
+    done < "$WORK_TMP/big.list"
+    while IFS= read -r -d '' f; do
         is_binary_skip_cheap "$f" || printf '%s\0' "$f"
-    done
+    done < "$WORK_TMP/found.list"
 }
 
 # Path relativo alla radice del repo che contiene $1. Il risultato va in
-# _RELPATH_RESULT (globale): chiamare come comando semplice, MAI con $(...)
+# _RELPATH_RESULT (globale), il path su cui provare i glob di scope in
+# _SCOPEPATH_RESULT: coincidono, salvo per un file fuori da ogni repo, che si
+# stampa come passato ma si confronta col path assoluto (così anche una
+# scansione con "." aggancia i glob "*/..."). Chiamare come comando semplice,
+# MAI con $(...)
 # (una subshell perderebbe le cache). Memoizza per directory la forma assoluta
 # e la toplevel git; per i file sotto REPO_DIR / EXTRA_REPO_DIR / --rel-root il
 # relativo è una pura sottrazione di prefisso, senza invocare git.
 declare -A _ABSDIR_CACHE _TOPLEVEL_CACHE
 _RELPATH_RESULT=""
+_SCOPEPATH_RESULT=""
 
 _looks_absolute_clean() {
     # "/..." (unix) o "X:/..." (Windows), senza segmenti "." / ".." da risolvere.
@@ -206,7 +233,9 @@ rel_path_for() {
         filebase="${f##*/}"
         filedir="${f%/*}"
         [[ "$filedir" == "$f" ]] && filedir="."   # nessuna "/" nel path dato
-        if [[ -v _ABSDIR_CACHE["$filedir"] ]]; then
+        # ${a[$k]+x}, non [[ -v a[$k] ]]: su bash 5.1 -v rivaluta il nome e
+        # eseguirebbe un $(...) contenuto nel nome di una cartella.
+        if [[ -n "${_ABSDIR_CACHE[$filedir]+x}" ]]; then
             absdir="${_ABSDIR_CACHE[$filedir]}"
         else
             absdir="$(cd -- "$filedir" 2>/dev/null && pwd)"
@@ -218,6 +247,7 @@ rel_path_for() {
     # --rel-root esplicito: priorità massima.
     if [[ -n "$_EXTRA_ROOT_ABS" && "$abs" == "$_EXTRA_ROOT_ABS"/* ]]; then
         _RELPATH_RESULT="${REL_PREFIX}${abs#"$_EXTRA_ROOT_ABS"/}"
+        _SCOPEPATH_RESULT="$_RELPATH_RESULT"
         return 0
     fi
 
@@ -225,13 +255,14 @@ rel_path_for() {
     for known in "$_REPO_DIR_ABS" "$_EXTRA_REPO_ABS"; do
         if [[ -n "$known" && "$abs" == "$known"/* ]]; then
             _RELPATH_RESULT="${abs#"$known"/}"
+            _SCOPEPATH_RESULT="$_RELPATH_RESULT"
             return 0
         fi
     done
 
     # Altrove: chiedi a git (memoizzato per directory).
     absdir="${abs%/*}"
-    if [[ -v _TOPLEVEL_CACHE["$absdir"] ]]; then
+    if [[ -n "${_TOPLEVEL_CACHE[$absdir]+x}" ]]; then
         top="${_TOPLEVEL_CACHE[$absdir]}"
     else
         top="$(git -C "$absdir" rev-parse --show-toplevel 2>/dev/null)" || true
@@ -242,8 +273,10 @@ rel_path_for() {
     fi
     if [[ -n "${top:-}" ]]; then
         _RELPATH_RESULT="${abs#"$top"/}"
+        _SCOPEPATH_RESULT="$_RELPATH_RESULT"
     else
         _RELPATH_RESULT="$f"
+        _SCOPEPATH_RESULT="$abs"
     fi
 }
 
@@ -425,18 +458,73 @@ REPO_TOP=""
 # rimossa all'uscita.
 WORK_TMP="$(mktemp -d)" || { log_fail "impossibile creare una cartella temporanea"; exit 2; }
 trap 'rm -rf "$WORK_TMP"' EXIT
+# Senza questi, un segnale chiude la shell senza passare dal trap EXIT e la
+# cartella (che può contenere copie dei file e il report di gitleaks) resta.
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 # REALPATHS[i] / REPORTPATHS[i]: file fisico da leggere / path da stampare e
 # da usare come chiave dell'allowlist. Riempiti prima, così lo scan gira UNA
 # volta per regola su tutti i file insieme (un grep per regola, non per coppia
 # file-regola: ogni processo è costoso su Git Bash/Windows).
-# _REPORTPATH_OF: stesso contenuto indicizzato per realpath (lookup O(1)).
-declare -a REALPATHS=() REPORTPATHS=()
-declare -A _REPORTPATH_OF=()
-add_target() {
+# _REPORTPATH_OF / _SCOPEPATH_OF: indicizzati per realpath (lookup O(1)).
+declare -a REALPATHS=() REPORTPATHS=() SCOPEPATHS=()
+declare -A _REPORTPATH_OF=() _SCOPEPATH_OF=()
+add_target() {   # add_target <file da leggere> <path da stampare> [path per lo scope]
+    local scope="${3:-$2}"
     REALPATHS+=("$1")
     REPORTPATHS+=("$2")
+    SCOPEPATHS+=("$scope")
     _REPORTPATH_OF["$1"]="$2"
+    _SCOPEPATH_OF["$1"]="$scope"
+}
+
+# --- grep a lotti ------------------------------------------------------------
+# Limite prudente in byte per lotto. Linux ammette circa 2 MB per riga di comando.
+# Su Git Bash grep (programma MSYS) ha retto 16 MB alla prova, ma ogni processo costa
+# molto: lotti grandi. Un grep nativo Windows nel PATH (32 KB) darebbe un errore,
+# quindi exit 2, non un falso pulito. Un ciclo in bash invece di xargs: xargs riassume
+# in 123 sia "nessun match" (grep 1) sia "errore" (grep 2), qui l'exit code resta distinto.
+_BATCH_BYTES=100000
+case "${OSTYPE:-}" in msys*|cygwin*) _BATCH_BYTES=1000000 ;; esac
+if [[ -v SECRET_SCAN_BATCH_BYTES ]] && [[ -n "$SECRET_SCAN_BATCH_BYTES" ]]; then
+    _BATCH_BYTES="$SECRET_SCAN_BATCH_BYTES"   # solo per il collaudo
+fi
+declare -a _BATCH_START=() _BATCH_COUNT=()
+make_batches() {
+    local i=0 start=0 bytes=0 len p
+    _BATCH_START=(); _BATCH_COUNT=()
+    for p in "${REALPATHS[@]}"; do
+        len=$(( ${#p} + 9 ))   # terminatore e puntatore dell'argomento
+        if [[ "$i" -gt "$start" && $(( bytes + len )) -gt "$_BATCH_BYTES" ]]; then
+            _BATCH_START+=("$start"); _BATCH_COUNT+=("$(( i - start ))")
+            start="$i"; bytes=0
+        fi
+        bytes=$(( bytes + len ))
+        i=$(( i + 1 ))
+    done
+    if [[ "$i" -gt "$start" ]]; then
+        _BATCH_START+=("$start"); _BATCH_COUNT+=("$(( i - start ))")
+    fi
+}
+
+# run_grep_batched <file output> <comando grep con opzioni...>
+# Accoda a <file output> i risultati su tutti i REALPATHS. grep risponde 0 (match)
+# o 1 (nessun match); da 2 in su (errore, argomenti troppi per exec) si esce con 2.
+run_grep_batched() {
+    local out="$1" b rc
+    shift
+    : > "$out"
+    for b in "${!_BATCH_START[@]}"; do
+        "$@" -- "${REALPATHS[@]:${_BATCH_START[$b]}:${_BATCH_COUNT[$b]}}" \
+            >> "$out" 2> "$WORK_TMP/grep.err"
+        rc=$?
+        if [[ "$rc" -ge 2 ]]; then
+            log_fail "grep fallito (exit $rc), scansione incompleta: $(head -n 3 "$WORK_TMP/grep.err")"
+            exit 2
+        fi
+    done
 }
 
 if [[ "$STAGED" -eq 1 ]]; then
@@ -451,13 +539,23 @@ if [[ "$STAGED" -eq 1 ]]; then
     # -z + core.quotepath=off: senza, git quota i path non-ASCII con escape
     # ottali che non combaciano con nessun file reale, e il file sparirebbe
     # dallo scan in silenzio.
-    if ! git -C "$REPO_TOP" -c core.quotepath=off diff --cached --name-only \
-            --diff-filter=ACMR -z > "$STAGED_LIST_FILE" 2>/dev/null; then
+    # --raw per avere il modo del file; --no-renames: un rename è un file nuovo,
+    # e il formato -z ha così sempre due campi per voce.
+    if ! git -C "$REPO_TOP" -c core.quotepath=off diff --cached --raw --no-abbrev \
+            --no-renames --diff-filter=ACMT -z > "$STAGED_LIST_FILE" 2>/dev/null; then
         log_fail "impossibile elencare i file in staging (git diff --cached fallito)"
         exit 2
     fi
-    while IFS= read -r -d '' path; do
+    while IFS= read -r -d '' _meta && IFS= read -r -d '' path; do
         [[ -z "$path" ]] && continue
+        # Voce ":<modo vecchio> <modo nuovo> <sha> <sha> <stato>". 160000 è un
+        # gitlink (submodule): nell'indice non c'è un file da leggere, e il suo
+        # contenuto si controlla nel repo del submodule.
+        _mode="${_meta#* }"; _mode="${_mode%% *}"
+        if [[ "$_mode" == "160000" ]]; then
+            log_warn "submodule saltato: $path"
+            continue
+        fi
         mkdir -p -- "$STAGED_TMPDIR/$(dirname -- "$path")"
         # ":0:" esplicito: ":1:x" come nome file verrebbe letto come stage 1.
         if ! git -C "$REPO_TOP" show ":0:$path" > "$STAGED_TMPDIR/$path" 2>/dev/null; then
@@ -480,55 +578,112 @@ else
     while IFS= read -r -d '' f; do
         [[ -z "$f" ]] && continue
         rel_path_for "$f"   # NON $(...): vedi il commento sulla funzione
-        add_target "$f" "$_RELPATH_RESULT"
+        add_target "$f" "$_RELPATH_RESULT" "$_SCOPEPATH_RESULT"
     done < "$WORK_TMP/expanded.list"
 fi
 
 # --- file con byte NUL (binari, UTF-16) --------------------------------------
-# grep tratta un file con NUL come binario e risponde "Binary file matches"
-# senza stampare le righe: lo scanner non vedrebbe nulla e darebbe exit 0.
-# Questi file (riconosciuti con una sola chiamata grep, locale C) vengono
-# scansionati su una copia normalizzata:
-#   - BOM UTF-16 (FF FE / FE FF): decodificata in UTF-8 con iconv. Se iconv
-#     manca si esce con 2 (fail-closed): meglio bloccare che dare un falso
-#     "pulito" su un file che non si sa leggere.
-#   - altrimenti (NUL sparsi, UTF-16 senza BOM): copia senza i byte NUL, che
-#     ricompone il testo ASCII; i numeri di riga restano quelli del file.
-# Le estensioni binarie note restano saltate prima (is_binary_skip_cheap).
-if [[ "${#REALPATHS[@]}" -gt 0 ]]; then
-    declare -A _NUL_FILES=()
-    LC_ALL=C grep -ILZ -e '' -- "${REALPATHS[@]}" > "$WORK_TMP/nul.list" 2>/dev/null
-    while IFS= read -r -d '' f; do
-        [[ -s "$f" ]] && _NUL_FILES["$f"]=1
-    done < "$WORK_TMP/nul.list"
-    if [[ "${#_NUL_FILES[@]}" -gt 0 ]]; then
-        mkdir -p "$WORK_TMP/norm"
-        _old_real=("${REALPATHS[@]}"); _old_rep=("${REPORTPATHS[@]}")
-        REALPATHS=(); REPORTPATHS=(); _REPORTPATH_OF=()
-        _n=0
-        for i in "${!_old_real[@]}"; do
-            f="${_old_real[$i]}"
-            if [[ -z "${_NUL_FILES[$f]:-}" ]]; then
-                add_target "$f" "${_old_rep[$i]}"
-                continue
-            fi
-            _n=$((_n+1))
-            nf="$WORK_TMP/norm/$_n"
-            bom="$(LC_ALL=C od -An -tx1 -N2 < "$f" | tr -d ' \n')"
-            if [[ "$bom" == "fffe" || "$bom" == "feff" ]]; then
-                if ! command -v iconv >/dev/null 2>&1; then
-                    log_fail "file UTF-16 da decodificare ma iconv non è installato: ${_old_rep[$i]}"
-                    exit 2
-                fi
-                if ! iconv -c -f UTF-16 -t UTF-8 < "$f" > "$nf" 2>/dev/null; then
-                    log_warn "iconv fallito su ${_old_rep[$i]}: scansione senza decodifica"
-                    LC_ALL=C tr -d '\000' < "$f" > "$nf"
+# Senza -a grep tratta un file con NUL come binario; con -a un NUL nella riga
+# stampata romperebbe il parsing. Questi file si scansionano quindi su copie:
+#   - BOM UTF-16 o UTF-32: decodifica con iconv. Se iconv manca si esce con 2
+#     (meglio bloccare che dare un falso "pulito").
+#   - firma binaria certa (is_binary_signature): saltato.
+#   - altrimenti due copie, con gli stessi numeri di riga: NUL tolti (ricompone il
+#     testo UTF-16/UTF-32 senza BOM) e NUL sostituiti da spazi (tiene il confine
+#     in "abc<NUL>valore", che la prima copia cancellerebbe).
+# La scelta è per firma e non per densità di NUL: un UTF-16 senza BOM ha il 50% di
+# NUL come un binario, e la densità riaprirebbe quel falso negativo.
+
+# Primi 4 byte in esadecimale in _SIG, con i soli builtin (nessun processo per
+# file). Da chiamare in locale C: "'$c" deve dare il valore del byte.
+read_signature() {
+    local c h i
+    _SIG=""
+    {
+        for i in 1 2 3 4; do
+            if IFS= read -r -d '' -n 1 c; then
+                if [[ -z "$c" ]]; then
+                    _SIG+="00"
+                else
+                    printf -v h '%02x' "'$c"; _SIG+="$h"
                 fi
             else
-                LC_ALL=C tr -d '\000' < "$f" > "$nf"
+                break
             fi
-            add_target "$nf" "${_old_rep[$i]}"
         done
+    } < "$1"
+}
+
+# Solo firme che un testo non può avere per caso: niente "%PDF" o "GIF8", che si
+# scrivono da tastiera. Per "MZ" serve anche il quarto byte (parte alta di un campo
+# che vale meno di 512), così una riga di testo che inizia per MZ non è un binario.
+is_binary_signature() {
+    case "$1" in
+        7f454c46|feedface|feedfacf|cefaedfe|cffaedfe|cafebabe) return 0 ;;   # ELF, Mach-O, class
+        4d5a??00|4d5a??01) return 0 ;;                                        # PE
+        504b0304|504b0506|504b0708) return 0 ;;                               # zip, jar, docx
+        0061736d) return 0 ;;                                                 # wasm
+        1f8b*|fd377a58|377abcaf) return 0 ;;                                  # gzip, xz, 7z
+        89504e47|ffd8ff*|d0cf11e0) return 0 ;;                                # png, jpeg, OLE2
+    esac
+    return 1
+}
+
+normalize_nul_files() {
+    local LC_ALL=C
+    local i f nf rep scope enc _n=0
+    local -a old_real=("${REALPATHS[@]}") old_rep=("${REPORTPATHS[@]}") old_scope=("${SCOPEPATHS[@]}")
+    REALPATHS=(); REPORTPATHS=(); SCOPEPATHS=(); _REPORTPATH_OF=(); _SCOPEPATH_OF=()
+    mkdir -p "$WORK_TMP/norm"
+    for i in "${!old_real[@]}"; do
+        f="${old_real[$i]}"; rep="${old_rep[$i]}"; scope="${old_scope[$i]}"
+        if [[ -z "${_NUL_FILES[$f]:-}" ]]; then
+            add_target "$f" "$rep" "$scope"
+            continue
+        fi
+        read_signature "$f"
+        enc=""
+        case "$_SIG" in
+            fffe0000|0000feff) enc="UTF-32" ;;
+            fffe*|feff*)       enc="UTF-16" ;;
+        esac
+        if [[ -z "$enc" ]] && is_binary_signature "$_SIG"; then
+            continue
+        fi
+        _n=$((_n+1))
+        nf="$WORK_TMP/norm/$_n"
+        if [[ -n "$enc" ]]; then
+            if ! command -v iconv >/dev/null 2>&1; then
+                log_fail "file $enc da decodificare ma iconv non è installato: $rep"
+                exit 2
+            fi
+            # Un U+0000 decodificato tornerebbe NUL: spazio, come nella seconda copia.
+            iconv -c -f "$enc" -t UTF-8 < "$f" 2>/dev/null | tr '\000' ' ' > "$nf"
+            if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
+                add_target "$nf" "$rep" "$scope"
+                continue
+            fi
+            log_warn "iconv fallito su $rep: scansione senza decodifica"
+        fi
+        tr -d '\000' < "$f" > "$nf"
+        add_target "$nf" "$rep" "$scope"
+        tr '\000' ' ' < "$f" > "$nf.sp"
+        add_target "$nf.sp" "$rep" "$scope"
+    done
+}
+
+if [[ "${#REALPATHS[@]}" -gt 0 ]]; then
+    declare -A _NUL_FILES=()
+    make_batches
+    # -I -c: un file con NUL in qualunque punto conta 0 righe, anche dopo 200 KB di
+    # testo (-L invece si fermerebbe alla prima riga). Tolti i vuoti, restano loro.
+    LC_ALL=C run_grep_batched "$WORK_TMP/nul.list" grep -IcHZ -e ''
+    while IFS= read -r -d '' f && IFS= read -r _count; do
+        [[ "$_count" == "0" && -s "$f" ]] && _NUL_FILES["$f"]=1
+    done < "$WORK_TMP/nul.list"
+    if [[ -n "${!_NUL_FILES[*]}" ]]; then
+        normalize_nul_files
+        make_batches
     fi
 fi
 
@@ -597,8 +752,7 @@ if [[ "${#REALPATHS[@]}" -gt 0 ]]; then
         # ":" o con newline non confonde il parsing. "--": nomi con "-".
         grep_opts=(-nHEa --null)
         _flag_has "$flags" CI && grep_opts=(-nHEai --null)
-        grep "${grep_opts[@]}" -e "$regex" -- "${REALPATHS[@]}" \
-            > "$WORK_TMP/matches" 2>/dev/null
+        run_grep_batched "$WORK_TMP/matches" grep "${grep_opts[@]}" -e "$regex"
         [[ -s "$WORK_TMP/matches" ]] || continue
         while IFS= read -r -d '' mfile && IFS= read -r mrest; do
             lineno="${mrest%%:*}"
@@ -606,7 +760,7 @@ if [[ "${#REALPATHS[@]}" -gt 0 ]]; then
             [[ -z "$lineno" ]] && continue
             reportpath="${_REPORTPATH_OF[$mfile]:-}"
             [[ -z "$reportpath" ]] && continue
-            if [[ "${#SCOPE_GLOBS[@]}" -gt 0 ]] && is_rule_excluded_for_path "$reportpath" "$name"; then
+            if [[ "${#SCOPE_GLOBS[@]}" -gt 0 ]] && is_rule_excluded_for_path "${_SCOPEPATH_OF[$mfile]:-$reportpath}" "$name"; then
                 continue
             fi
             if _flag_has "$flags" PLACEHOLDER; then
@@ -634,7 +788,8 @@ fi
 if command -v gitleaks >/dev/null 2>&1; then
     for t in "${TARGETS[@]:-}"; do
         [[ -d "$t" ]] || continue
-        GL_REPORT="$(mktemp)"
+        # Il report contiene i valori trovati: dentro WORK_TMP, rimossa anche su TERM.
+        GL_REPORT="$WORK_TMP/gitleaks-report.json"
         if gitleaks detect --no-git --source "$t" --report-format json \
                 --report-path "$GL_REPORT" --no-banner --exit-code 0 >/dev/null 2>&1; then
             if [[ -s "$GL_REPORT" ]] && command -v node >/dev/null 2>&1; then

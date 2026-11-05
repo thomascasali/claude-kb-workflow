@@ -1,22 +1,20 @@
 # Project Memories
 
-> Una "project memory" è una scheda riassuntiva del progetto che Claude legge a ogni nuova sessione: il contesto che serve a chiunque (umano o agente) apra il progetto, versionato INSIEME al progetto invece che nella memoria locale di una macchina.
+> Una "project memory" è la scheda dei fatti stabili di un progetto: il contesto che serve a chiunque (umano o agente) apra il progetto, in un posto solo.
 
 ## Come funzionano
 
-Ogni progetto ha un file `MEMORY.md` (o equivalente) che vive **nel progetto stesso** (non in questo repo) e descrive:
+Ogni progetto ha un file `project-memories/<progetto>.md` nella **tua KB privata** (non in questo repo). Descrive:
 
 - Stack tecnologico
 - Hosting / Deploy
 - Decisioni architetturali chiave
 - Bug ricorrenti / lezioni apprese
-- Stato attuale e prossimi passi
-- Link a wiki / KB / documentazione
+- Review log
+- Link alla pagina wiki del progetto, che tiene stato corrente e prossimi passi
+- Link a documentazione
 
-Il file viene letto automaticamente da Claude Code se posizionato in:
-- `<progetto>/CLAUDE.md` (alternativa al MEMORY.md)
-- `<progetto>/.claude/memory/MEMORY.md`
-- `~/.claude/projects/<slug>/MEMORY.md`
+Stato, versione e prossimi passi non si scrivono qui: la project memory ha solo il link a `wiki/projects/<progetto>.md`. Le istruzioni per lavorare nel repo stanno nel `CLAUDE.md` del repo. La tabella completa è in [`docs/fonte-unica.md`](../docs/fonte-unica.md).
 
 ## In questo repo
 
@@ -40,6 +38,5 @@ Questa cartella contiene **solo template ed esempi anonimi** per mostrare il pat
 
 ## Pattern consigliato
 
-✅ Tieni le project memory **dentro il progetto** (`<progetto>/CLAUDE.md` o equivalente) e versionale lì.
-✅ Usa questo repo solo per template e esempi formativi.
-✅ Se devi sincronizzare memory tra macchine, usa un repo **privato** separato.
+✅ Tieni le project memory nella KB, in un repo **privato**, e versionale lì.
+✅ Usa questo repo solo per template ed esempi formativi.
