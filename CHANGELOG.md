@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.0] - Unreleased
+## [0.4.0] - 2026-11-05
 
 Three model tiers, a promotion rule that matches how the toolkit is actually run,
 two new guides, and a round of text corrections.
