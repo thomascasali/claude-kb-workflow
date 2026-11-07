@@ -68,7 +68,7 @@ Qui restano i fatti stabili e il review log.
 
 ## 🚨 Pattern critici applicabili
 
-Lista dei pattern dal repo `claude-kb-workflow/patterns/patterns.md` (o convenzioni personali in `field-notes-it.md`) che si applicano a questo progetto:
+Lista dei pattern dal repo `memoteca/patterns/patterns.md` (o convenzioni personali in `field-notes-it.md`) che si applicano a questo progetto:
 
 - [ ] #N — [Nome pattern] (es: VITE_API_URL)
 - [ ] #N — ...

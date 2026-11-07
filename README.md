@@ -1,6 +1,18 @@
-# claude-kb-workflow
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/memoteca-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/memoteca-light.svg">
+  <img src="assets/memoteca.svg" alt="Memoteca" width="320">
+</picture>
+</p>
 
-> **Knowledge that crosses your projects.** Claude Code's native auto-memory is
+# Memoteca
+
+**Knowledge that carries across projects**
+
+_Formerly claude-kb-workflow._
+
+> Claude Code's native auto-memory is
 > per-project and per-machine: the lesson you paid for in one repo never
 > reaches the other twenty. This toolkit compiles sessions into a wiki and
 > promotes a page to a stable, cross-project KB only when it passes the
@@ -12,7 +24,7 @@
 > **They're complementary: they install side by side without conflicts**. See
 > [the 2026 comparison](docs/comparison-2026.md).
 
-**claude-kb-workflow** is an open-source knowledge pipeline for Claude Code
+**Memoteca** is an open-source knowledge pipeline for Claude Code
 (sessions → LLM wiki → stable KB, in the Karpathy wiki tradition) for people
 who maintain many unrelated projects alone. It ships with orchestrated
 subagents, production patterns, and methodological skills, plus a write-up of
@@ -32,7 +44,7 @@ When you work with Claude Code across multiple projects, you keep hitting the sa
 - **Different stacks need different patterns**, but you write them all from memory every time
 - **Architectural decisions** made months ago get forgotten
 
-`claude-kb-workflow` solves this with 4 pieces that work together. The first
+Memoteca solves this with 4 pieces that work together. The first
 is the core; the other three are the gear that comes with it:
 
 ### 1. KB-driven system (`commands/` + `llm-wiki-template/`) — the core
@@ -102,8 +114,8 @@ worked example of a cross-project conventions file rather than as advice for you
 ### Installation
 
 ```bash
-git clone https://github.com/thomascasali/claude-kb-workflow.git
-cd claude-kb-workflow
+git clone https://github.com/thomascasali/memoteca.git
+cd memoteca
 ./scripts/install.sh
 ```
 
@@ -146,7 +158,7 @@ Deeper dive → [docs/filosofia.md](docs/filosofia.md) (in Italian)
 
 ## Compared to Superpowers, GSD and gstack
 
-| Aspect | Superpowers | claude-kb-workflow |
+| Aspect | Superpowers | Memoteca |
 |---------|-------------|---------------------|
 | What it is | Methodological framework (TDD-strict, plan-driven) | Shared knowledge layer: KB + wiki + agents + patterns |
 | **Concerned with** | **How you run *the* session** | **What remains AFTER the session** |
@@ -181,7 +193,7 @@ becomes noise. This system separates fresh knowledge (wiki, updated per
 session) from authoritative knowledge (KB, promoted only when it passes the promotion
 exam), so what it reads is the part that held up.
 
-### claude-kb-workflow vs Superpowers — which one do I need?
+### Memoteca vs Superpowers — which one do I need?
 
 Both, if anything. Superpowers (like GSD and gstack) governs *how the agent
 runs a session*: TDD, plans, guardrails. This toolkit governs *what survives
@@ -208,7 +220,7 @@ mechanics; the role prompts and the policies port anywhere. Details in
 ## Repo structure
 
 ```
-claude-kb-workflow/
+memoteca/
 ├── README.md                    # This file
 ├── TESTING-GUIDE.md             # Guide for people who want to test the toolkit
 ├── CONTRIBUTING.md              # How to contribute
@@ -325,7 +337,17 @@ MIT. See [LICENSE](LICENSE). Fork it, modify it, redistribute it. If it's useful
 
 ## 🇮🇹 Per gli sviluppatori italiani
 
-> **Conoscenza che attraversa i progetti.** L'auto-memory nativa di Claude Code
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/memoteca-mark-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/memoteca-mark-light.svg">
+  <img src="assets/memoteca-mark.svg" alt="Memoteca" width="96">
+</picture>
+</p>
+
+**Memoteca: la conoscenza che attraversa i progetti.** In precedenza claude-kb-workflow.
+
+> L'auto-memory nativa di Claude Code
 > è per-progetto e per-macchina: la lezione pagata su un repo non arriva mai
 > agli altri venti. Questo toolkit compila le sessioni in una wiki e promuove
 > una pagina alla KB stabile e trasversale solo quando supera l'esame di
@@ -350,8 +372,8 @@ I documenti di approfondimento hanno una versione italiana nativa:
 ### Avvio rapido
 
 ```bash
-git clone https://github.com/thomascasali/claude-kb-workflow.git
-cd claude-kb-workflow
+git clone https://github.com/thomascasali/memoteca.git
+cd memoteca
 ./scripts/install.sh
 ```
 

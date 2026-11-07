@@ -1,8 +1,8 @@
-# claude-kb-workflow nel panorama 2026 (Superpowers, GSD, gstack)
+# Memoteca nel panorama 2026 (Superpowers, GSD, gstack)
 
 > 🇬🇧 English version: [docs/comparison-2026.md](comparison-2026.md)
 
-> Una valutazione franca dei diversi approcci, scritta da chi ha **adottato e adattato** parti di Superpowers in `claude-kb-workflow`. Aggiornato: **agosto 2026**.
+> Una valutazione franca dei diversi approcci, scritta da chi ha **adottato e adattato** parti di Superpowers in Memoteca. Aggiornato: **agosto 2026**.
 
 ---
 
@@ -19,7 +19,7 @@ stabilizza, Superpowers esegue"**:
 In parallelo, le **raccolte di agenti si sono commoditizzate**: esistono toolkit con 100-135
 agenti pronti. Competere sulla quantità di agenti non ha più senso per nessuno.
 
-**Dove si colloca `claude-kb-workflow`**: in un'altra categoria — il **livello di conoscenza trasversale ai progetti**.
+**Dove si colloca Memoteca**: in un'altra categoria — il **livello di conoscenza trasversale ai progetti**.
 Gli skills framework ti dicono *come eseguire* una sessione; questo repo si occupa di *cosa
 resta* dopo la sessione: la pipeline wiki→KB (pattern Karpathy), i pattern
 pagati in produzione, il disaster recovery della conoscenza. **Si installano insieme senza
@@ -29,7 +29,7 @@ conflitti: loro il metodo di esecuzione, noi il livello di conoscenza.**
 
 ## TL;DR
 
-| | Superpowers | claude-kb-workflow |
+| | Superpowers | Memoteca |
 |---|-------------|---------------------|
 | **Cos'è** | Framework metodologico | Livello di conoscenza condiviso: KB + wiki + agenti + pattern |
 | **Filosofia** | Imponi un workflow disciplinato | Cattura esperienza e rendila riusabile |
@@ -38,7 +38,7 @@ conflitti: loro il metodo di esecuzione, noi il livello di conoscenza.**
 | **Target ideale** | Team SaaS con disciplina debole | Solo-dev e piccoli team multi-progetto |
 | **Lingua** | English-only | Inglese porta d'ingresso, italiano nativo |
 
-**Non sono concorrenti** — sono complementari per costruzione. Le 3 skill metodologiche in `claude-kb-workflow` sono **adattamenti italianizzati e ammorbiditi** da Superpowers.
+**Non sono concorrenti** — sono complementari per costruzione. Le 3 skill metodologiche in Memoteca sono **adattamenti italianizzati e ammorbiditi** da Superpowers.
 
 > ⚠️ Nota di freschezza: le sezioni di dettaglio qui sotto fotografano Superpowers a
 > **maggio 2026** (14 skill). Il progetto evolve rapidamente: verifica sul repo ufficiale
@@ -77,9 +77,9 @@ brainstorming → writing-plans → executing-plans → test-driven-development
 
 ---
 
-## Cos'è claude-kb-workflow
+## Cos'è Memoteca
 
-`claude-kb-workflow` parte da una premessa opposta: **non un framework, ma un livello di conoscenza condiviso**.
+Memoteca parte da una premessa opposta: **non un framework, ma un livello di conoscenza condiviso**.
 
 ```
 13 subagent (3 orchestratori + 10 specialisti) (cosa fare per stack)
@@ -88,7 +88,7 @@ brainstorming → writing-plans → executing-plans → test-driven-development
 + Sistema KB-driven (come accumulare conoscenza nel tempo)
 ```
 
-### Punti di forza di claude-kb-workflow
+### Punti di forza di Memoteca
 
 ✅ **Pattern reali**: ogni pattern viene da bug effettivi in produzione, non da teoria
 ✅ **Stratificazione**: separazione esplicita tra conoscenza fresca (wiki) e conoscenza autorevole (KB)
@@ -97,7 +97,7 @@ brainstorming → writing-plans → executing-plans → test-driven-development
 ✅ **Modulare**: installi solo le parti che ti servono
 ✅ **Auto-regolabile**: trigger descrittivi che l'utente può raffinare
 
-### Punti deboli di claude-kb-workflow
+### Punti deboli di Memoteca
 
 ❌ **Meno disciplinato**: i trigger contestuali sono più morbidi delle regole imperative — un'agente "sciatto" può ignorarli
 ❌ **Più maturità richiesta**: l'utente deve sapere quando applicare un pattern e quando no
@@ -109,11 +109,11 @@ brainstorming → writing-plans → executing-plans → test-driven-development
 
 ## Come si confrontano sulle 3 skill condivise
 
-In `claude-kb-workflow` sono presenti 3 skill metodologiche **derivate da Superpowers** ma adattate. Vediamole una per una.
+In Memoteca sono presenti 3 skill metodologiche **derivate da Superpowers** ma adattate. Vediamole una per una.
 
-### `systematic-debugging` (Superpowers) vs `debugging-sistematico` (kb-workflow)
+### `systematic-debugging` (Superpowers) vs `debugging-sistematico` (Memoteca)
 
-| | Superpowers | kb-workflow |
+| | Superpowers | Memoteca |
 |---|-------------|-------------|
 | **Lingua** | Inglese | Italiano |
 | **Tono** | "NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST" (imperativo) | "I fix sui sintomi falliscono" (principio + esempi) |
@@ -121,18 +121,18 @@ In `claude-kb-workflow` sono presenti 3 skill metodologiche **derivate da Superp
 | **Casi specifici** | No | Sì (Laravel, Node, Flutter, Docker) |
 | **Stop rule** | Identica (3 fix falliti → ferma) | Identica |
 
-### `verification-before-completion` (Superpowers) vs `verifica-prima-di-completare` (kb-workflow)
+### `verification-before-completion` (Superpowers) vs `verifica-prima-di-completare` (Memoteca)
 
-| | Superpowers | kb-workflow |
+| | Superpowers | Memoteca |
 |---|-------------|-------------|
 | **Lingua** | Inglese | Italiano |
 | **Tono** | "NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE" | "L'evidenza precede la dichiarazione di fatto" |
 | **Eccezioni** | Non esplicite | Esplicite (esplorazione, sola ricerca) |
 | **Casi specifici** | Generici | Per stack (Laravel test, Flutter analyze, Docker compose config, browser load) |
 
-### `brainstorming` (Superpowers) vs `brainstorming-design` (kb-workflow)
+### `brainstorming` (Superpowers) vs `brainstorming-design` (Memoteca)
 
-| | Superpowers | kb-workflow |
+| | Superpowers | Memoteca |
 |---|-------------|-------------|
 | **Lingua** | Inglese | Italiano |
 | **Quando attivarla** | "Anche progetti semplici beneficiano" | Esplicitamente NON per edit puntuali, fix banali, istruzioni esplicite |
@@ -144,9 +144,9 @@ In `claude-kb-workflow` sono presenti 3 skill metodologiche **derivate da Superp
 
 ---
 
-## Cosa Superpowers ha che claude-kb-workflow non ha
+## Cosa Superpowers ha che Memoteca non ha
 
-| Feature Superpowers | Stato in kb-workflow |
+| Feature Superpowers | Stato in Memoteca |
 |---------------------|-----------------------|
 | `test-driven-development` | Non presente come skill dedicata — principio incluso in `debugging-sistematico` |
 | `writing-plans` / `executing-plans` | Non presenti — sostituiti da agent `Plan` nativo + `planning-with-files` community |
@@ -158,13 +158,13 @@ In `claude-kb-workflow` sono presenti 3 skill metodologiche **derivate da Superp
 | `writing-skills` | Sostituito da `anthropic-skills:skill-creator` ufficiale |
 | `using-superpowers` (meta) | Inutile senza il framework completo |
 
-In sostanza: 9 skill su 14 di Superpowers sono **duplicate da funzionalità native di Claude Code** o coperte da altri toolkit. Per questo `claude-kb-workflow` non le include.
+In sostanza: 9 skill su 14 di Superpowers sono **duplicate da funzionalità native di Claude Code** o coperte da altri toolkit. Per questo Memoteca non le include.
 
 ---
 
-## Cosa claude-kb-workflow ha che Superpowers non ha
+## Cosa Memoteca ha che Superpowers non ha
 
-| Feature kb-workflow | Stato in Superpowers |
+| Feature Memoteca | Stato in Superpowers |
 |---------------------|----------------------|
 | **13 subagent (3 orchestratori + 10 specialisti) per stack specifici** | Non presenti — Superpowers è stack-agnostic |
 | **16 pattern generalizzati da produzione reale** | Non presenti |
@@ -176,13 +176,13 @@ In sostanza: 9 skill su 14 di Superpowers sono **duplicate da funzionalità nati
 | **Template project memory** | Non presente |
 | **Documentazione in italiano** | Non presente |
 
-In sostanza: kb-workflow è **più completo sul lato "knowledge"** e **meno completo sul lato "metodologia"**.
+In sostanza: Memoteca è **più completo sul lato "knowledge"** e **meno completo sul lato "metodologia"**.
 
 ---
 
 ## Possono coesistere?
 
-**Sì, e in `claude-kb-workflow` lo dimostriamo**:
+**Sì, e in Memoteca lo dimostriamo**:
 
 1. Le 3 skill metodologiche di Superpowers (adattate) sono incluse
 2. Le altre 11 skill di Superpowers possono essere installate manualmente accanto
@@ -192,7 +192,7 @@ In sostanza: kb-workflow è **più completo sul lato "knowledge"** e **meno comp
 Scenario realistico:
 ```
 Sviluppatore Laravel + Vue + Flutter
-├── claude-kb-workflow (questo repo) → installa agenti + pattern + KB-driven
+├── Memoteca (questo repo) → installa agenti + pattern + KB-driven
 ├── Superpowers (opzionale) → installa skill metodologiche aggiuntive (TDD, plans, ecc.)
 └── Anthropic skills (ufficiali) → pptx, docx, xlsx, pdf
 ```
@@ -208,7 +208,7 @@ Sviluppatore Laravel + Vue + Flutter
 - Il tuo stack è generico (SaaS web, niente IoT/didattica/embedded)
 - Hai un team che vuole uniformità
 
-### Scegli claude-kb-workflow se:
+### Scegli Memoteca se:
 - Vuoi documentazione e pattern in italiano
 - Lavori su molti progetti con stack diversi
 - Preferisci accumulare conoscenza nel tempo (KB-driven)
@@ -219,7 +219,7 @@ Sviluppatore Laravel + Vue + Flutter
 - Vuoi il meglio dei due mondi: **un framework di esecuzione + un livello di conoscenza condiviso**
 - Il tuo problema non è "come lavora l'agente in sessione" ma "perché rifaccio gli
   stessi errori di tre mesi fa" → quella parte nessuno degli skills framework la copre
-- Hai tempo di apprendere 2 sistemi (l'onboarding di kb-workflow è più leggero: si
+- Hai tempo di apprendere 2 sistemi (l'onboarding di Memoteca è più leggero: si
   parte con gli agenti + pattern, la pipeline wiki→KB si aggiunge quando serve)
 
 ---

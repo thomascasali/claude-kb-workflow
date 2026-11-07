@@ -146,7 +146,7 @@ restore_flat() {
     shopt -u nullglob
 }
 
-echo "=== claude-kb-workflow — RESTORE ===" >&2
+echo "=== Memoteca — RESTORE ===" >&2
 echo "Da: $REPO_DIR" >&2
 echo "A:  $CLAUDE_HOME" >&2
 [[ $DRY_RUN -eq 1 ]] && echo "(dry-run: nessuna scrittura)" >&2

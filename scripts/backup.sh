@@ -15,7 +15,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-echo -e "${GREEN}=== claude-kb-workflow — BACKUP ===${NC}"
+echo -e "${GREEN}=== Memoteca — BACKUP ===${NC}"
 echo "Da: $CLAUDE_HOME"
 echo "A:  $REPO_DIR"
 echo ""
@@ -29,7 +29,7 @@ fi
 # e nessun controllo (scanner, hook) potrebbe girare. Meglio fermarsi prima di copiare.
 if ! git -C "$REPO_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     echo -e "${RED}Errore: $REPO_DIR non è un repository git.${NC}" >&2
-    echo "Il backup deve scrivere dentro un clone di claude-kb-workflow (cartella con .git)." >&2
+    echo "Il backup deve scrivere dentro un clone di Memoteca (cartella con .git)." >&2
     echo "Nessun file è stato copiato." >&2
     exit 1
 fi

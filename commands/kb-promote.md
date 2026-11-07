@@ -2,7 +2,7 @@
 
 Promuovi il concetto specificato da `llm-wiki/wiki/concepts/` alla **KB stabile** (questo repo o un fork): $ARGUMENTS
 
-> **Path**: `$LLM_WIKI_PATH` per la wiki, `$KB_PATH` per la KB stabile (es. clone locale di `claude-kb-workflow`).
+> **Path**: `$LLM_WIKI_PATH` per la wiki, `$KB_PATH` per la KB stabile (es. clone locale di Memoteca).
 
 ## Esame di promozione (verifica prima di procedere)
 

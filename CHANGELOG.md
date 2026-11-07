@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+Renamed to Memoteca. The repository moved to thomascasali/memoteca; GitHub redirects the old URLs.
+
 ## [0.4.1] - 2026-11-05
 
 Fix for a false clean in the secret scanner.

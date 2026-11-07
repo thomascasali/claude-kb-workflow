@@ -1,4 +1,4 @@
-# Guida al Test di claude-kb-workflow
+# Guida al Test di Memoteca
 
 > Questa guida è pensata per **colleghi e studenti** che vogliono provare il toolkit nei propri progetti e fornire feedback.
 >
@@ -35,8 +35,8 @@ Prima di iniziare, verifica di avere:
 
 ```bash
 # Su Linux/macOS o Git Bash su Windows
-git clone https://github.com/thomascasali/claude-kb-workflow.git
-cd claude-kb-workflow
+git clone https://github.com/thomascasali/memoteca.git
+cd memoteca
 ```
 
 ### Esegui l'installer

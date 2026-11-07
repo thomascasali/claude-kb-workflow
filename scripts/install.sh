@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-# INSTALL: claude-kb-workflow → ~/.claude/
+# INSTALL: Memoteca → ~/.claude/
 # Installazione interattiva degli agenti, pattern, skill, comandi
 # ============================================
 
@@ -25,7 +25,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 echo -e "${BLUE}╔═══════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║   claude-kb-workflow — Installazione                  ║${NC}"
+echo -e "${BLUE}║   Memoteca — Installazione                            ║${NC}"
 echo -e "${BLUE}╚═══════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo "Da: $REPO_DIR"

@@ -1,4 +1,4 @@
-# Filosofia di claude-kb-workflow
+# Filosofia di Memoteca
 
 > Perché questo toolkit esiste e perché è fatto in questo modo.
 
@@ -24,7 +24,7 @@ Lavorare con un LLM agentico su molti progetti diversi ti scontra costantemente 
 
 I framework di sviluppo (TDD strict, Scrum strict, Clean Architecture strict) spesso impongono un metodo astratto che funziona benissimo sulla carta e malissimo nella varietà del lavoro reale.
 
-`claude-kb-workflow` parte dall'opposto: **catturare cosa ha funzionato in produzione** e renderlo riusabile. Il metodo emerge dalla pratica, non viene imposto.
+Memoteca parte dall'opposto: **catturare cosa ha funzionato in produzione** e renderlo riusabile. Il metodo emerge dalla pratica, non viene imposto.
 
 Conseguenza pratica: gli agenti contengono **esempi di codice reale** (sanitizzati) accanto agli antipattern osservati. I pattern in `patterns.md` (e le mie convenzioni in `field-notes-it.md`) sono tutti accompagnati da "sintomo / causa / fix verificato".
 
@@ -62,7 +62,7 @@ Questo è opposto alla filosofia di framework rigidi tipo Superpowers che usano 
 
 ## Anti-filosofia
 
-Cose che `claude-kb-workflow` **non vuole essere**:
+Cose che Memoteca **non vuole essere**:
 
 ### ❌ Un framework completo
 

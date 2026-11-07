@@ -85,13 +85,13 @@ Qui restano i fatti stabili e il review log.
 
 ## 🚨 Pattern critici applicabili
 
-Pattern generali dal repo `claude-kb-workflow/patterns/patterns.md`:
+Pattern generali dal repo `memoteca/patterns/patterns.md`:
 
 - [x] #1 — Laravel: AdminMiddleware invece di auth:api + admin
 - [x] #5 — Laravel config:cache dopo modifiche .env
 - [x] #7 — Docker bind mount permessi sovrascritti
 
-Convenzioni personali da `claude-kb-workflow/patterns/field-notes-it.md`:
+Convenzioni personali da `memoteca/patterns/field-notes-it.md`:
 
 - [x] #1 — deploy.sh è LOCALE
 - [x] #2 — Git → deploy workflow obbligatorio

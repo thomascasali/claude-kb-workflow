@@ -3,7 +3,7 @@
 > Template per il sistema KB-driven a due livelli ispirato al pattern di Andrej Karpathy ("software 2.0 knowledge management").
 >
 > **Separazione chiave**: questo repo (la **wiki**) cattura la conoscenza *compilata* dalle sessioni quotidiane.
-> La conoscenza *stabile e curata* vive in un repo separato (es. il tuo fork di `claude-kb-workflow`).
+> La conoscenza *stabile e curata* vive in un repo separato (es. il tuo fork di Memoteca).
 
 ---
 

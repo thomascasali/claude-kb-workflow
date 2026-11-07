@@ -1,4 +1,4 @@
-# Contribuire a claude-kb-workflow
+# Contribuire a Memoteca
 
 Grazie per il tuo interesse! Questo progetto cresce con i contributi della community.
 
