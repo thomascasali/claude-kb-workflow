@@ -1,6 +1,8 @@
 # Filosofia di Memoteca
 
 > Perché questo toolkit esiste e perché è fatto in questo modo.
+>
+> Memoteca è un metodo di lavoro per Claude Code: conoscenza condivisa tra i progetti, un lead che delega ad agenti, un gate del reviewer prima di dire "fatto".
 
 ---
 

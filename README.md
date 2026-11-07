@@ -10,6 +10,12 @@
 
 **Knowledge that carries across projects**
 
+Memoteca: a working method for Claude Code. Shared, curated knowledge across projects (sessions to wiki to stable KB, with a promotion exam), a lead that delegates to agents on three model tiers, and a reviewer gate before anything counts as done. Skills, patterns, restore test.
+
+- **Knowledge**: sessions → wiki → stable KB, with a promotion exam. See [the KB-driven system](#1-kb-driven-system-commands--llm-wiki-template--the-core).
+- **Orchestration**: one lead, three model tiers with escalation, 10 specialists. See [the subagents](#2-orchestrated-subagents-agents).
+- **Quality**: reviewer gate, incremental review log, methodological skills, secret scanner, restore test. See [the skills](#4-methodological-skills-skills) and [the restore dry-run](docs/knowledge-disaster-recovery.md).
+
 _Formerly claude-kb-workflow._
 
 > Claude Code's native auto-memory is
@@ -24,9 +30,9 @@ _Formerly claude-kb-workflow._
 > **They're complementary: they install side by side without conflicts**. See
 > [the 2026 comparison](docs/comparison-2026.md).
 
-**Memoteca** is an open-source knowledge pipeline for Claude Code
-(sessions → LLM wiki → stable KB, in the Karpathy wiki tradition) for people
-who maintain many unrelated projects alone. It ships with orchestrated
+**Memoteca** is an open-source working method for Claude Code, for people
+who maintain many unrelated projects alone. Its core is a knowledge pipeline
+(sessions → LLM wiki → stable KB, in the Karpathy wiki tradition). It ships with orchestrated
 subagents, production patterns, and methodological skills, plus a write-up of
 [a restore dry-run that failed](docs/knowledge-disaster-recovery.md), with the
 four silent gaps it exposed. Docs in English and Italian.
@@ -44,7 +50,13 @@ When you work with Claude Code across multiple projects, you keep hitting the sa
 - **Different stacks need different patterns**, but you write them all from memory every time
 - **Architectural decisions** made months ago get forgotten
 
-Memoteca solves this with 4 pieces that work together. The first
+Memoteca answers with three parts that feed each other:
+
+- **Knowledge.** What a session teaches goes into a wiki, and only what passes the promotion exam reaches the stable KB that every project reads.
+- **Orchestration.** The main model acts as a lead and hands work to agents. There are three model tiers, you move up only for a reason you can state, and 10 specialists cover the usual stacks.
+- **Quality.** Nothing counts as done until the reviewer has seen it. The review log keeps each review to the diff since the last one, the skills enforce method, a scanner keeps secrets out of the KB, and the restore test shows whether the whole setup can be rebuilt.
+
+In the repo this is four pieces. The first
 is the core; the other three are the gear that comes with it:
 
 ### 1. KB-driven system (`commands/` + `llm-wiki-template/`) — the core
@@ -346,6 +358,12 @@ MIT. See [LICENSE](LICENSE). Fork it, modify it, redistribute it. If it's useful
 </p>
 
 **Memoteca: la conoscenza che attraversa i progetti.** In precedenza claude-kb-workflow.
+
+Memoteca: un metodo di lavoro per Claude Code. Conoscenza condivisa e curata tra i progetti (dalle sessioni alla wiki alla KB stabile, con un esame di promozione), un lead che delega ad agenti su tre livelli di modello e un gate del reviewer prima che qualcosa conti come finito. Skill, pattern, test di ripristino.
+
+- **Conoscenza**: sessione → wiki → KB, con l'esame di promozione. Vedi [il workflow KB-driven](docs/workflow-kb-driven.md).
+- **Orchestrazione**: un lead, tre livelli di modello con escalation, 10 specialisti. Vedi [l'orchestrazione](docs/orchestrazione.md).
+- **Qualità**: gate del reviewer, review log incrementale, skill di metodo, scanner anti-segreti, test di ripristino. Vedi [il review log](docs/review-log-incrementale.md) e [il disaster recovery](docs/disaster-recovery-conoscenza.md).
 
 > L'auto-memory nativa di Claude Code
 > è per-progetto e per-macchina: la lezione pagata su un repo non arriva mai

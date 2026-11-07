@@ -1,6 +1,6 @@
 # Memoteca
 
-> Open-source knowledge pipeline for Claude Code, for people who maintain many unrelated projects alone. Claude Code's native memory is per-project and per-machine; this toolkit adds the cross-project layer: sessions → LLM wiki → stable KB, with a promotion exam (used by 2+ projects, or a gotcha already paid for, or a declared standard, and always verified in production). Ships orchestrated subagents, production patterns, methodological skills, and a documented restore dry-run that failed. English docs, native Italian included. MIT license.
+> A working method for Claude Code. Shared, curated knowledge across projects (sessions → LLM wiki → stable KB, with a promotion exam: used by 2+ projects, or a gotcha already paid for, or a declared standard, and always verified in production), a lead that delegates to agents on three model tiers with 10 specialists, and a reviewer gate before anything counts as done. Includes methodological skills, production patterns, a secret scanner and a documented restore dry-run that failed. Built for people who maintain many unrelated projects alone. English docs, native Italian included. MIT license.
 
 ## Docs
 
