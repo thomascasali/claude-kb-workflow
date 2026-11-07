@@ -67,7 +67,7 @@ in production or on a real device. See [the full KB-driven workflow](docs/kb-dri
 [where each kind of information lives](docs/single-source-of-truth.md),
 [the incremental review log](docs/incremental-review-log.md)
 and the [knowledge disaster recovery](docs/knowledge-disaster-recovery.md).
-Prefer slides? The same method as [an interactive presentation](https://thomascasali.github.io/presentazione-kb-workflow/?lang=en), in English and Italian.
+Prefer slides? The same method as [an interactive presentation](https://thomascasali.github.io/presentazione-memoteca/?lang=en), in English and Italian.
 
 ### 2. Orchestrated subagents (`agents/`)
 
@@ -367,7 +367,7 @@ I documenti di approfondimento hanno una versione italiana nativa:
 - [docs/confronto-superpowers.md](docs/confronto-superpowers.md) — confronto con Superpowers/GSD/gstack
 - [docs/fonte-unica.md](docs/fonte-unica.md) — dove vive ogni tipo di informazione
 - [docs/review-log-incrementale.md](docs/review-log-incrementale.md) — rivedere solo ciò che è cambiato dall'ultima review
-- [Presentazione interattiva](https://thomascasali.github.io/presentazione-kb-workflow/) — lo stesso metodo raccontato per gli studenti (italiano e inglese)
+- [Presentazione interattiva](https://thomascasali.github.io/presentazione-memoteca/) — lo stesso metodo raccontato per gli studenti (italiano e inglese)
 
 ### Avvio rapido
 
